@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> <!--    EN WEI-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--    EN WEI-->
+    <item android:id="@+id/nav_home" android:title="Home" android:icon="@drawable/ic_home"/>
+    <item android:id="@+id/nav_gallery" android:title="Gallery" android:icon="@drawable/ic_home"/>
+    <item android:id="@+id/nav_slideshow" android:title="Slideshow" android:icon="@drawable/ic_search"/>
+</menu>

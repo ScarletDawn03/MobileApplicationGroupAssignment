@@ -42,12 +42,27 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.794">
 
-        <Button
-            android:id="@+id/selectFile"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="openFile"
-            android:text="Upload File" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/selectFile"
+                android:layout_width="165dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#3F51B5"
+                android:onClick="openFile"
+                android:text="Upload File" />
+
+            <Button
+                android:id="@+id/rst_uplbtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#DF3636"
+                android:text="Reset" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/showfilename"

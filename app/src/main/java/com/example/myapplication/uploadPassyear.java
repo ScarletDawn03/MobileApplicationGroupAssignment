@@ -32,6 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 public class uploadPassyear extends AppCompatActivity {
@@ -39,8 +41,8 @@ public class uploadPassyear extends AppCompatActivity {
     private Spinner upl_category;
     private TextInputLayout upl_desc_layout;
     private TextInputEditText upl_desc;
-    private Button upl_btn,selectFile_btn;
-    private String fileName,code,name,category,desc;
+    private Button upl_btn,selectFile_btn,rst_uplbtn;
+    private String fileName,fileOrgName,fileExtName,code,name,category,desc;
     private Uri pdfuri;
 
     private ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
@@ -58,8 +60,9 @@ public class uploadPassyear extends AppCompatActivity {
                                 int filesize = returnCursor.getColumnIndex(OpenableColumns.SIZE);
                                 long filesizeInByte = returnCursor.getLong(filesize);
                                 long maxfileSize = 15 * 1024 * 1024;
-                                fileName = returnCursor.getString(nameIndex);
+                                fileOrgName = returnCursor.getString(nameIndex);
                                 returnCursor.close();
+                                fileExtName = fileOrgName.substring(0,fileOrgName.length()-4);
 
                                 //Check size of file uploaded
                                 if(filesizeInByte > maxfileSize){
@@ -69,9 +72,9 @@ public class uploadPassyear extends AppCompatActivity {
                                 }
                             }
                             // Display information (you can remove this or modify as needed)
-                            String info = "File Name: " + fileName + "\n";
-                            if(!fileName.isEmpty()){
-                                show_uplname.setText("Selected File:" + fileName);
+                            String info = "File Name: " + fileOrgName + "\n";
+                            if(!fileOrgName.isEmpty()){
+                                show_uplname.setText("Selected File:" + fileOrgName);
                             }
 
                             Toast.makeText(uploadPassyear.this, info, Toast.LENGTH_LONG).show();
@@ -88,6 +91,15 @@ public class uploadPassyear extends AppCompatActivity {
         setContentView(R.layout.activity_upload_passyear);
         getIDForViews();
         setFormEnabled(true);
+
+        rst_uplbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pdfuri=null;
+                show_uplname.setText("");
+                Toast.makeText(uploadPassyear.this, "Remove selected file", Toast.LENGTH_LONG).show();
+            }
+        });
 
         upl_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,6 +186,7 @@ public class uploadPassyear extends AppCompatActivity {
         upl_btn = findViewById(R.id.upload_btn);
         show_uplname = findViewById(R.id.showfilename);
         selectFile_btn = findViewById(R.id.selectFile);
+        rst_uplbtn = findViewById(R.id.rst_uplbtn);
     }
 
     private void setFormEnabled(boolean enabled) {
@@ -195,7 +208,9 @@ public class uploadPassyear extends AppCompatActivity {
     private void uploadPDFAndSaveData() {
         if (pdfuri != null) {
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            fileName = System.currentTimeMillis() + ".pdf";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
+            String timeStamp = sdf.format(new Date());
+            fileName =  fileExtName+"_"+timeStamp+ ".pdf";
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
 
             fileRef.putFile(pdfuri)//Upload file to firebase storage

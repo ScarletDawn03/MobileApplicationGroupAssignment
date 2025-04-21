@@ -5,4 +5,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string-array name="answer_category">
+        <item>Select type of assessment</item>
+        <item>Quiz</item>
+        <item>Midterm</item>
+        <item>Practical Test</item>
+        <item>Final Assessment</item>
+    </string-array>
 </resources>

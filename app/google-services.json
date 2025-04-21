@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "942038656680",
+    "firebase_url": "https://unishareas-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "unishareas",
+    "storage_bucket": "unishareas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942038656680:android:a305408b916b3fc87a049d",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq6QZXn8xSUFeZ6MVduLpMwtQkgb8WMnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942038656680:android:aec54e380995a9687a049d",
+        "android_client_info": {
+          "package_name": "my.edu.utar.unishare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq6QZXn8xSUFeZ6MVduLpMwtQkgb8WMnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

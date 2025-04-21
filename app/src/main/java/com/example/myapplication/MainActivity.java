@@ -1,11 +1,15 @@
 package com.example.myapplication;
 //EN WEI
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar; // FIXED: correct Toolbar import
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -23,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //GET STORAGE PERMISSION
+        ActivityCompat.requestPermissions(this,
+                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                PackageManager.PERMISSION_GRANTED);
 
         // Set up the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -67,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_search) {
                 showToast("Bottom: Search selected");
+                Intent intent = new Intent(this, uploadPassyear.class);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_profile) {
                 showToast("Bottom: Profile selected");

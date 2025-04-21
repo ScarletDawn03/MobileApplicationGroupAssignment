@@ -25,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -35,6 +36,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class uploadPassyear extends AppCompatActivity {
     private TextView upl_code,upl_name,show_uplname;
@@ -146,6 +148,8 @@ public class uploadPassyear extends AppCompatActivity {
         startActivity(intent);
     }
     private void addCourseToDB(String code, String name, String category, String desc,String pdfUrl){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String currentDate = sdf.format(new Date());
         //create hashmap
         HashMap<String,Object> courseHashmap = new HashMap<>();
         courseHashmap.put("cr_code",code);
@@ -153,9 +157,11 @@ public class uploadPassyear extends AppCompatActivity {
         courseHashmap.put("cr_category",category);
         courseHashmap.put("cr_desc",desc);
         courseHashmap.put("cr_pdfUrl",pdfUrl);
+        courseHashmap.put("created_at", currentDate);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference coursesRef = database.getReference("courses");
+
 
         //something like primary key
         String key = coursesRef.push().getKey();

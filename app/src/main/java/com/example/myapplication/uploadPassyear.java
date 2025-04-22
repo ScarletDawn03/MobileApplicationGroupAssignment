@@ -47,6 +47,9 @@ public class uploadPassyear extends AppCompatActivity {
     private String fileName,fileOrgName,fileExtName,code,name,category,desc;
     private Uri pdfuri;
 
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference coursesRef = database.getReference("courses");
+
     private ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             //Unable use startActivityForResult directly as it deprecated
             new ActivityResultContracts.StartActivityForResult(),
@@ -147,7 +150,7 @@ public class uploadPassyear extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
-    private void addCourseToDB(String code, String name, String category, String desc,String pdfUrl){
+    private void addCourseToDB(String code, String name, String category, String desc,String filename,String pdfUrl){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
         //create hashmap
@@ -156,11 +159,9 @@ public class uploadPassyear extends AppCompatActivity {
         courseHashmap.put("cr_name",name);
         courseHashmap.put("cr_category",category);
         courseHashmap.put("cr_desc",desc);
+        courseHashmap.put("cr_pdfName",filename);
         courseHashmap.put("cr_pdfUrl",pdfUrl);
         courseHashmap.put("created_at", currentDate);
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference coursesRef = database.getReference("courses");
 
 
         //something like primary key
@@ -219,11 +220,10 @@ public class uploadPassyear extends AppCompatActivity {
             fileName =  fileExtName+"_"+timeStamp+ ".pdf";
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
 
-            fileRef.putFile(pdfuri)//Upload file to firebase storage
-                    .addOnSuccessListener(taskSnapshot -> {
+            fileRef.putFile(pdfuri).addOnSuccessListener(taskSnapshot -> {
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                             String pdfUrl = uri.toString();
-                            addCourseToDB(code,name,category,desc,fileName);
+                            addCourseToDB(code,name,category,desc,fileName,pdfUrl);
                         });
                     })
                     .addOnFailureListener(e -> {

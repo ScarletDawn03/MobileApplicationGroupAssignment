@@ -23,21 +23,25 @@
             app:title="My App"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
+
+
         <FrameLayout
             android:id="@+id/nav_host_fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <!-- Your TextView added inside FrameLayout -->
-            <TextView
-                android:id="@+id/hello_text"
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/search_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Hello, World!"
-                android:gravity="center"
-                android:textSize="20sp"
-                android:textColor="@android:color/black" />
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:queryHint="Search course code..."
+                android:iconifiedByDefault="false"
+                android:background="@drawable/search_background" />
+
 
         </FrameLayout>
 

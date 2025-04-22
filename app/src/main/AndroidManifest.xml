@@ -18,12 +18,6 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".CompleteProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignInActivity"
-            android:exported="true" />
-        <activity
             android:name=".myUpload"
             android:exported="false" />
         <activity
@@ -34,10 +28,15 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Added CourseSearchActivity -->
+        <activity
+            android:name=".CourseSearchActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

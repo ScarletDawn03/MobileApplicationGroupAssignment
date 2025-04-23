@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="My App"
+            app:title="UniShare"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
 
@@ -31,16 +31,14 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/search_view"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/welcome_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:queryHint="Search course code..."
-                android:iconifiedByDefault="false"
-                android:background="@drawable/search_background" />
+                android:text="Welcome!"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="16dp" />
 
 
         </FrameLayout>

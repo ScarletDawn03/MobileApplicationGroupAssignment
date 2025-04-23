@@ -5,6 +5,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,11 +36,15 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
+    private TextView welcomeText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        welcomeText = findViewById(R.id.welcome_text);
+
 
         //GET STORAGE PERMISSION
         ActivityCompat.requestPermissions(this,
@@ -78,12 +84,12 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            if (id == R.id.nav_home) {
-                showToast("Drawer: Home selected");
-            } else if (id == R.id.nav_gallery) {
-                showToast("Drawer: Gallery selected");
-            } else if (id == R.id.nav_slideshow) {
-                showToast("Drawer: Slideshow selected");
+            if (id == R.id.nav_search) {
+                showToast("Search selected");
+            } else if (id == R.id.nav_profile) {
+                showToast("Profile selected");
+            } else if (id == R.id.nav_upload) {
+                showToast("Upload selected");
             } else if (id == R.id.nav_logout) {
                 FirebaseAuth.getInstance().signOut(); // Sign out from Firebase
 
@@ -111,15 +117,17 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            if (id == R.id.nav_home) {
+            if (id == R.id.nav_search) {
                 // Navigate to CourseSearchActivity
                 Intent intent = new Intent(MainActivity.this, CourseSearchActivity.class);
                 startActivity(intent);
                 return true;
-            } else if (id == R.id.nav_search) {
-                showToast("Bottom: Search selected");
+            } else if (id == R.id.nav_upload) {
                 Intent intent = new Intent(this, uploadPassyear.class);
                 startActivity(intent);
+                return true;
+            } else if (id == R.id.nav_updates) {
+                showToast("Bottom: Update selected");
                 return true;
             } else if (id == R.id.nav_profile) {
                 showToast("Bottom: Profile selected");
@@ -142,6 +150,10 @@ public class MainActivity extends AppCompatActivity {
                     String dateOfBirth = dataSnapshot.child("dateOfBirth").getValue(String.class);
                     String fullName = dataSnapshot.child("fullName").getValue(String.class);
                     String gender = dataSnapshot.child("gender").getValue(String.class);
+
+                    if (fullName != null) {
+                        welcomeText.setText("Welcome, " + fullName + "!");
+                    }
 
                     // If any of the required fields are missing, redirect to profile completion activity
                     if (contactNumber == null || dateOfBirth == null || fullName == null || gender == null) {

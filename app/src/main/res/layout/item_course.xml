@@ -1,34 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="8dp"
+    android:elevation="4dp"
+    android:padding="8dp"
+    app:cardCornerRadius="12dp">
 
-    <!-- Course Title -->
-    <TextView
-        android:id="@+id/course_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Course Title"
-        android:textSize="16sp"
-        android:padding="4dp"/>
+        android:orientation="vertical">
 
-    <!-- Course Category -->
-    <TextView
-        android:id="@+id/course_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Category"
-        android:textSize="14sp"
-        android:padding="4dp"/>
+        <TextView
+            android:id="@+id/course_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Course Title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="4dp"/>
 
-    <!-- PDF Name -->
-    <TextView
-        android:id="@+id/course_pdfName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="PDF Name"
-        android:textSize="12sp"
-        android:padding="4dp"/>
-</LinearLayout>
+        <TextView
+            android:id="@+id/course_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="14sp"
+            android:padding="4dp"/>
+
+        <TextView
+            android:id="@+id/course_pdfName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PDF Name"
+            android:textSize="12sp"
+            android:padding="4dp"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -16,7 +16,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:paddingTop="10dp"
-        android:src="@drawable/ic_home"
+        android:src="@drawable/profile"
         android:contentDescription="Profile Image" />
 
     <TextView

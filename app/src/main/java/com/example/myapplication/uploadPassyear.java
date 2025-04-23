@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -150,7 +151,7 @@ public class uploadPassyear extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
-    private void addCourseToDB(String code, String name, String category, String desc,String filename,String pdfUrl){
+    private void addCourseToDB(String code, String name, String category, String desc,String filename,String pdfUrl,String author){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
         //create hashmap
@@ -162,6 +163,7 @@ public class uploadPassyear extends AppCompatActivity {
         courseHashmap.put("cr_pdfName",filename);
         courseHashmap.put("cr_pdfUrl",pdfUrl);
         courseHashmap.put("created_at", currentDate);
+        courseHashmap.put("created_by",author);
 
 
         //something like primary key
@@ -220,10 +222,13 @@ public class uploadPassyear extends AppCompatActivity {
             fileName =  fileExtName+"_"+timeStamp+ ".pdf";
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
 
+            SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+            String userEmail = sharedPreferences.getString("user_email", null);
+
             fileRef.putFile(pdfuri).addOnSuccessListener(taskSnapshot -> {
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                             String pdfUrl = uri.toString();
-                            addCourseToDB(code,name,category,desc,fileName,pdfUrl);
+                            addCourseToDB(code,name,category,desc,fileName,pdfUrl,userEmail);
                         });
                     })
                     .addOnFailureListener(e -> {

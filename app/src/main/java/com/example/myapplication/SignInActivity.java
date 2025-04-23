@@ -157,19 +157,33 @@ public class SignInActivity extends AppCompatActivity {
                     mDatabase.child(uid).setValue(newUser).addOnCompleteListener(setTask -> {
                         if (setTask.isSuccessful()) {
                             Log.d("FirebaseDB", "User data saved successfully.");
+                            // Save email to SharedPreferences
+                            SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("user_email", email);
+                            editor.apply();
+                            Log.d("SharedPrefs", "Email saved: " + email);
                         } else {
                             Log.e("FirebaseDB", "Failed to save user data.", setTask.getException());
                         }
                     });
                 } else {
-                    // Data already exists, do not overwrite
                     Log.d("FirebaseDB", "User data already exists. Skipping write.");
+
+                    // You can still store email even if user data already exists
+                    String email = user.getEmail();
+                    SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("user_email", email);
+                    editor.apply();
+                    Log.d("SharedPrefs", "Email saved: " + email);
                 }
             } else {
                 Log.e("FirebaseDB", "Failed to check existing user data.", task.getException());
             }
         });
     }
+
 
 
 }

@@ -1,9 +1,7 @@
 package com.example.myapplication;
 
-import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,9 +13,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -28,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -36,8 +31,8 @@ import java.util.Calendar;
 public class CompleteProfileActivity extends AppCompatActivity {
 
     private EditText fullNameField, contactNumberField, dateOfBirthField, genderField;
-    private Button saveProfileBtn, cancelBtn;
-    private ImageView profilePhotoView;
+    private Button saveProfileBtn, cancelBtn, uploadImageBtn;
+    private ImageView profilePhotoView, selectedPhotoView;
 
     private DatabaseReference mDatabase;
     private String uid;
@@ -64,8 +59,10 @@ public class CompleteProfileActivity extends AppCompatActivity {
         dateOfBirthField = findViewById(R.id.et_dateOfBirth);
         genderField = findViewById(R.id.et_gender);
         profilePhotoView = findViewById(R.id.iv_profile_photo);
+        selectedPhotoView = findViewById(R.id.iv_selected_photo);
         saveProfileBtn = findViewById(R.id.btn_saveProfile);
         cancelBtn = findViewById(R.id.btn_cancel);
+        uploadImageBtn = findViewById(R.id.btn_upload_image);
 
         // Google sign-in
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -77,8 +74,8 @@ public class CompleteProfileActivity extends AppCompatActivity {
         // Date picker
         dateOfBirthField.setOnClickListener(v -> showDatePicker());
 
-        // Profile photo click
-        profilePhotoView.setOnClickListener(v -> chooseProfileImage());
+        // Upload image button
+        uploadImageBtn.setOnClickListener(v -> chooseProfileImage());
 
         // Save button
         saveProfileBtn.setOnClickListener(v -> saveUserProfile());
@@ -122,7 +119,10 @@ public class CompleteProfileActivity extends AppCompatActivity {
                     selectedImageUri = result.getData().getData();
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
-                        profilePhotoView.setImageBitmap(bitmap);
+                        selectedPhotoView.setImageBitmap(bitmap);
+                        selectedPhotoView.setVisibility(ImageView.VISIBLE);
+                        profilePhotoView.setVisibility(ImageView.INVISIBLE); // Hide default image
+                        uploadImageBtn.setText("Image Selected");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -140,7 +140,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Save basic data
+        // Save data
         mDatabase.child("users").child(uid).child("fullName").setValue(fullName);
         mDatabase.child("users").child(uid).child("contactNumber").setValue(contactNumber);
         mDatabase.child("users").child(uid).child("dateOfBirth").setValue(dateOfBirth);

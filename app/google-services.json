@@ -13,7 +13,20 @@
           "package_name": "com.example.myapplication"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "942038656680-b6hi05tr0ju2e5s45eki6d81qskd7snd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapplication",
+            "certificate_hash": "1162d72b4247915bb5b2fac9024a4890d2bc9ac2"
+          }
+        },
+        {
+          "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDq6QZXn8xSUFeZ6MVduLpMwtQkgb8WMnE"
@@ -21,7 +34,41 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942038656680:android:40d9f28353ba57767a049d",
+        "android_client_info": {
+          "package_name": "my.edu.utar.profilemodule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq6QZXn8xSUFeZ6MVduLpMwtQkgb8WMnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -32,7 +79,12 @@
           "package_name": "my.edu.utar.unishare"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDq6QZXn8xSUFeZ6MVduLpMwtQkgb8WMnE"
@@ -40,7 +92,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942038656680-fbvjuh1ko4mfkqcov5it6a3temgo6rar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

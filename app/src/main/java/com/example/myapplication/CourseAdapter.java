@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,15 +30,24 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        if (courseList.isEmpty()) {
+            // Handle empty list (you could show a placeholder if desired)
+            return;
+        }
+
         SourceDocumentModelClass course = courseList.get(position);
         holder.title.setText(course.getCr_name());
         holder.category.setText(course.getCr_category());
 
         // Set up a listener to open the PDF URL when clicked
         holder.itemView.setOnClickListener(v -> {
-            // Launch the PDF in a browser or another activity
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(course.getCr_pdfUrl()));
-            v.getContext().startActivity(browserIntent);
+            String pdfUrl = course.getCr_pdfUrl();
+            if (pdfUrl != null && !pdfUrl.isEmpty()) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl));
+                v.getContext().startActivity(browserIntent);
+            } else {
+                Toast.makeText(v.getContext(), "No PDF available", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -56,4 +66,3 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         }
     }
 }
-

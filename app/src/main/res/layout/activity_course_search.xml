@@ -33,6 +33,14 @@
         android:background="@drawable/upload_dropdown_border"
         android:entries="@array/answer_category" />
 
+    <Button
+        android:id="@+id/search_course_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"/>
+
     <!-- Results Label -->
     <TextView
         android:layout_width="match_parent"

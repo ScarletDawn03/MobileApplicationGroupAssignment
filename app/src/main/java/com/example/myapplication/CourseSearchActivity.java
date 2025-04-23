@@ -1,12 +1,13 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import androidx.appcompat.widget.SearchView;
-
+import android.util.Log;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,15 +31,17 @@ public class CourseSearchActivity extends AppCompatActivity {
     private FirebaseDatabase db;
     private FirebaseStorage storage;
     private DatabaseReference documentsRef;
+    private Button searchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_course_search); // Replace with your layout name
+        setContentView(R.layout.activity_course_search);
 
         searchView = findViewById(R.id.search_view);
         categorySpinner = findViewById(R.id.upload_category);
         recyclerView = findViewById(R.id.recycler_view);
+        searchButton = findViewById(R.id.search_course_button);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CourseAdapter(courseList);
@@ -46,53 +49,55 @@ public class CourseSearchActivity extends AppCompatActivity {
 
         db = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
-        documentsRef = db.getReference("documents"); // Reference to "documents" node in Firebase Database
+        documentsRef = db.getReference("courses");  // Correct reference to 'courses' node
 
-        // SearchView listener
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                fetchDocuments(query.trim().toUpperCase());
-                return true;
-            }
+        // Set up the search button click listener
+        searchButton.setOnClickListener(v -> {
+            String searchQuery = searchView.getQuery().toString().trim();
+            String selectedCategory = categorySpinner.getSelectedItem().toString();
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // Optional: live search
-                return false;
+            // Add debug toast here
+            Toast.makeText(this, "Searching: " + searchQuery + " in " + selectedCategory, Toast.LENGTH_SHORT).show();
+
+            if (searchQuery.isEmpty() || selectedCategory.isEmpty()) {
+                Toast.makeText(CourseSearchActivity.this, "Please fill in the search field and select a category", Toast.LENGTH_SHORT).show();
+            } else {
+                fetchDocuments(searchQuery, selectedCategory);
             }
         });
     }
 
-    private void fetchDocuments(String courseCode) {
-        String selectedCategory = categorySpinner.getSelectedItem().toString();
-
-        // Query Firebase Database to get documents matching courseCode and category
-        documentsRef.orderByChild("courseCode")
+    private void fetchDocuments(String courseCode, String category) {
+        // Query Firebase Database to get documents matching courseCode
+        documentsRef.orderByChild("cr_code")
                 .equalTo(courseCode)
                 .get()
                 .addOnSuccessListener(dataSnapshot -> {
-                    courseList.clear();
+
+                    Log.d("FirebaseDebug", "Querying for courseCode: " + courseCode + ", Category: " + category);
+                    Log.d("FirebaseDebug", "Found: " + dataSnapshot.getChildrenCount() + " items");
+
+                    courseList.clear(); // Clear the list before adding new items
+
                     for (DataSnapshot docSnapshot : dataSnapshot.getChildren()) {
-                        // Fetch metadata from Firebase Database
                         SourceDocumentModelClass item = docSnapshot.getValue(SourceDocumentModelClass.class);
 
-                        // Retrieve the file name (metadata) from the model
                         if (item != null && item.getCr_pdfName() != null) {
-                            // Now get the file URL from Firebase Storage
                             String fileName = item.getCr_pdfName();
                             StorageReference fileRef = storage.getReference().child("pdfs/" + fileName);
 
                             fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                                 // Update the model with the file URL
                                 item.setCr_pdfUrl(uri.toString());
-                                courseList.add(item);
-                                adapter.notifyDataSetChanged();
+                                courseList.add(item);  // Add the item to the list
                             }).addOnFailureListener(e -> {
                                 Toast.makeText(this, "Failed to fetch file URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                         }
                     }
+
+                    // Notify the adapter once all items have been added
+                    adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();

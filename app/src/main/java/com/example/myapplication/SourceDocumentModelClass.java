@@ -6,22 +6,22 @@ public class SourceDocumentModelClass {
     private String cr_desc;
     private String cr_name;
     private String cr_pdfName;
-    private String cr_pdfUrl;
+    private String cr_pdfUrl;  // This will hold the actual PDF URL
     private String created_at;
     private String key;
 
     // Required empty constructor (for Firebase)
-    public SourceDocumentModelClass () {}
+    public SourceDocumentModelClass() {}
 
     // Constructor
-    public SourceDocumentModelClass (String cr_category, String cr_code, String cr_desc, String cr_name,
-                          String cr_pdfName, String cr_pdfUrl, String created_at, String key) {
+    public SourceDocumentModelClass(String cr_category, String cr_code, String cr_desc, String cr_name,
+                                    String cr_pdfName, String cr_pdfUrl, String created_at, String key) {
         this.cr_category = cr_category;
         this.cr_code = cr_code;
         this.cr_desc = cr_desc;
         this.cr_name = cr_name;
         this.cr_pdfName = cr_pdfName;
-        this.cr_pdfUrl = cr_pdfUrl;
+        this.cr_pdfUrl = cr_pdfUrl;  // PDF URL set here
         this.created_at = created_at;
         this.key = key;
     }
@@ -68,7 +68,7 @@ public class SourceDocumentModelClass {
     }
 
     public String getCr_pdfUrl() {
-        return cr_pdfUrl;
+        return cr_pdfUrl != null ? cr_pdfUrl : "";  // Return empty string if null
     }
 
     public void setCr_pdfUrl(String cr_pdfUrl) {

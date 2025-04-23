@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(
                         this,
                         new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(getString(R.string.default_web_client_id))
+                                .requestIdToken(getString(R.string.client_id))
                                 .requestEmail()
                                 .build()
                 );
@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (id == R.id.nav_search) {
+                showToast("Bottom: Search selected");
                 Intent intent = new Intent(this, uploadPassyear.class);
                 startActivity(intent);
                 return true;

@@ -1,88 +1,89 @@
 package com.example.myapplication;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.util.Calendar;
 
 public class CompleteProfileActivity extends AppCompatActivity {
 
     private EditText fullNameField, contactNumberField, dateOfBirthField, genderField;
     private Button saveProfileBtn, cancelBtn;
+    private ImageView profilePhotoView;
+
     private DatabaseReference mDatabase;
     private String uid;
-
+    private FirebaseUser currentUser;
     private GoogleSignInClient mGoogleSignInClient;
+
+    private StorageReference storageReference;
+    private Uri selectedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete_profile);
 
-        // Firebase database reference
+        // Firebase
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        uid = currentUser.getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        storageReference = FirebaseStorage.getInstance().getReference("profile_photos");
 
-        // Get UID of current user
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        // Initialize views
+        // Views
         fullNameField = findViewById(R.id.et_fullname);
         contactNumberField = findViewById(R.id.et_contactNumber);
         dateOfBirthField = findViewById(R.id.et_dateOfBirth);
         genderField = findViewById(R.id.et_gender);
+        profilePhotoView = findViewById(R.id.iv_profile_photo);
         saveProfileBtn = findViewById(R.id.btn_saveProfile);
         cancelBtn = findViewById(R.id.btn_cancel);
 
-        // Setup Google Sign-In client
+        // Google sign-in
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(getString(R.string.client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Date picker for dateOfBirth
+        // Date picker
         dateOfBirthField.setOnClickListener(v -> showDatePicker());
 
-        // Save button logic
-        saveProfileBtn.setOnClickListener(v -> {
-            String fullName = fullNameField.getText().toString().trim();
-            String contactNumber = contactNumberField.getText().toString().trim();
-            String dateOfBirth = dateOfBirthField.getText().toString().trim();
-            String gender = genderField.getText().toString().trim();
+        // Profile photo click
+        profilePhotoView.setOnClickListener(v -> chooseProfileImage());
 
-            if (fullName.isEmpty() || contactNumber.isEmpty() || dateOfBirth.isEmpty() || gender.isEmpty()) {
-                Toast.makeText(CompleteProfileActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Save button
+        saveProfileBtn.setOnClickListener(v -> saveUserProfile());
 
-            mDatabase.child("users").child(uid).child("fullName").setValue(fullName);
-            mDatabase.child("users").child(uid).child("contactNumber").setValue(contactNumber);
-            mDatabase.child("users").child(uid).child("dateOfBirth").setValue(dateOfBirth);
-            mDatabase.child("users").child(uid).child("gender").setValue(gender)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            startActivity(new Intent(CompleteProfileActivity.this, MainActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(CompleteProfileActivity.this, "Failed to save profile", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        });
-
-        // Cancel button logic
+        // Cancel button
         cancelBtn.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
@@ -100,7 +101,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(
-                CompleteProfileActivity.this,
+                this,
                 (view, yearSelected, monthSelected, daySelected) -> {
                     String selectedDate = daySelected + "/" + (monthSelected + 1) + "/" + yearSelected;
                     dateOfBirthField.setText(selectedDate);
@@ -108,5 +109,65 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 year, month, day
         );
         datePickerDialog.show();
+    }
+
+    private void chooseProfileImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent);
+    }
+
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    selectedImageUri = result.getData().getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                        profilePhotoView.setImageBitmap(bitmap);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+    private void saveUserProfile() {
+        String fullName = fullNameField.getText().toString().trim();
+        String contactNumber = contactNumberField.getText().toString().trim();
+        String dateOfBirth = dateOfBirthField.getText().toString().trim();
+        String gender = genderField.getText().toString().trim();
+
+        if (fullName.isEmpty() || contactNumber.isEmpty() || dateOfBirth.isEmpty() || gender.isEmpty()) {
+            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save basic data
+        mDatabase.child("users").child(uid).child("fullName").setValue(fullName);
+        mDatabase.child("users").child(uid).child("contactNumber").setValue(contactNumber);
+        mDatabase.child("users").child(uid).child("dateOfBirth").setValue(dateOfBirth);
+        mDatabase.child("users").child(uid).child("gender").setValue(gender);
+
+        // Upload image if selected
+        if (selectedImageUri != null) {
+            String fileName = currentUser.getDisplayName() + ".jpg";
+            StorageReference fileRef = storageReference.child(fileName);
+
+            fileRef.putFile(selectedImageUri).addOnSuccessListener(taskSnapshot -> {
+                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
+                    mDatabase.child("users").child(uid).child("profilePhotoUrl").setValue(imageUrl)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    startActivity(new Intent(CompleteProfileActivity.this, MainActivity.class));
+                                    finish();
+                                } else {
+                                    Toast.makeText(this, "Failed to save profile image URL", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                });
+            }).addOnFailureListener(e -> Toast.makeText(this, "Image upload failed", Toast.LENGTH_SHORT).show());
+        } else {
+            startActivity(new Intent(CompleteProfileActivity.this, MainActivity.class));
+            finish();
+        }
     }
 }

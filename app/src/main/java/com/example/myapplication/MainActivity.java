@@ -127,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (id == R.id.nav_updates) {
-                showToast("Bottom: Update selected");
+                Intent intent = new Intent(this, NotificationsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_profile) {
                 Intent intent = new Intent(this, MainProfile.class);

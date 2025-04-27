@@ -231,6 +231,12 @@ public class uploadPassyear extends AppCompatActivity {
                             String pdfUrl = uri.toString();
                             addCourseToDB(code,name,category,desc,fileName,pdfUrl,userEmail);
                         });
+
+                        // Save successful update to SharedPreferences
+                        String newUpdate = "Upload successful for " + fileName  + " to " + code + " " + category;
+                        saveUpdateToPreferences(newUpdate);
+
+                        Toast.makeText(uploadPassyear.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Upload Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -238,6 +244,18 @@ public class uploadPassyear extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Please select a PDF first", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Method to save updates to SharedPreferences
+    private void saveUpdateToPreferences(String newUpdate) {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String existingUpdates = sharedPreferences.getString("update_list", "");
+
+        // Add new update to existing updates
+        String updatedUpdates = existingUpdates + "\n" + newUpdate;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("update_list", updatedUpdates);
+        editor.apply();
     }
 
 }

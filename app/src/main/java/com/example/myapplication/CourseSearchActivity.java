@@ -55,9 +55,28 @@ public class CourseSearchActivity extends AppCompatActivity {
         }
 
 
-    searchView = findViewById(R.id.search_view);
+        searchView = findViewById(R.id.search_view);
         // Set the placeholder (hint text) programmatically
         searchView.setQueryHint("Enter Course Code");
+
+        // Set up TextWatcher to limit the input
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // Handle query submit
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.length() > 10) {  // Change 10 to any limit you prefer
+                    // Trim the text to 10 characters
+                    searchView.setQuery(newText.substring(0, 10), false);
+                    Toast.makeText(CourseSearchActivity.this, "Max 10 characters allowed", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+        });
 
         categorySpinner = findViewById(R.id.upload_category);
         recyclerView = findViewById(R.id.recycler_view);
@@ -152,6 +171,7 @@ public class CourseSearchActivity extends AppCompatActivity {
         courseList.clear();
         adapter.notifyDataSetChanged();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

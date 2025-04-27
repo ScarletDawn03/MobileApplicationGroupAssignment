@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profile Visibility"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"
+        android:textColor="?android:attr/textColorPrimary"/>
+
+    <RadioGroup
+        android:id="@+id/rgPrivacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <RadioButton
+            android:id="@+id/rbPublic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Public"
+            android:layout_marginBottom="12dp"
+            android:textColor="?android:attr/textColorPrimary"/>
+
+        <!--<RadioButton
+            android:id="@+id/rbPeers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Peers Only"
+            android:layout_marginBottom="12dp" />-->
+
+        <RadioButton
+            android:id="@+id/rbPrivate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Private"
+            android:textColor="?android:attr/textColorPrimary"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnSavePrivacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:layout_marginTop="28dp"
+        android:padding="12dp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_button"/>
+</LinearLayout>

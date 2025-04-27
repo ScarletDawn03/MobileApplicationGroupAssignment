@@ -130,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Bottom: Update selected");
                 return true;
             } else if (id == R.id.nav_profile) {
+                Intent intent = new Intent(this, MainProfile.class);
+                startActivity(intent);
                 showToast("Bottom: Profile selected");
                 return true;
             }

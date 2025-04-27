@@ -90,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Profile selected");
             } else if (id == R.id.nav_upload) {
                 showToast("Upload selected");
+            } else if (id == R.id.about_us) {
+                Intent intent = new Intent(MainActivity.this, AboutUsActivity.class);
+                startActivity(intent);
             } else if (id == R.id.nav_logout) {
                 FirebaseAuth.getInstance().signOut(); // Sign out from Firebase
 

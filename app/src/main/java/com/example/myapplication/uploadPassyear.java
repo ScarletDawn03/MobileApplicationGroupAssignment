@@ -166,6 +166,10 @@ public class uploadPassyear extends AppCompatActivity {
         courseHashmap.put("created_at", currentDate);
         courseHashmap.put("created_by",author);
 
+        // Add the 'likes' attribute initialized to 0 and 'liked_by' as empty map
+        courseHashmap.put("likes", 0);
+        courseHashmap.put("liked_by", new HashMap<String, Boolean>());
+
 
         //something like primary key
         String key = coursesRef.push().getKey();

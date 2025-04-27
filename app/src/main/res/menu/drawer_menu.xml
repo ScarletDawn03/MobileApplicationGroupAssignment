@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?> <!--    EN WEI-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+
     <item
         android:id="@+id/nav_search"
         android:icon="@drawable/search"
@@ -15,6 +17,11 @@
         android:id="@+id/nav_profile"
         android:icon="@drawable/profile"
         android:title="Profile" />
+
+    <item
+        android:id="@+id/about_us"
+        android:icon="@drawable/aboutus"
+        android:title="About Us" />
 
     <item
         android:id="@+id/nav_logout"

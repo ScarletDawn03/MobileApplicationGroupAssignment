@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     android:background="?attr/colorBackground">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:title="Course Search"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp" />
+
     <!-- Top bar background adapts to primary color -->
     <View
         android:layout_width="match_parent"

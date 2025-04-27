@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- ScrollView has only ONE direct child: this LinearLayout -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:title="Course Search"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/titleText"
+                android:text="About Us"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Our Team -->
+            <TextView
+                android:id="@+id/teamTitle"
+                android:text="Our Team"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/teamMembers"
+                android:text="- Sim En Wei — 2206743\n- Jeremy Lim — I Dunno\n- Ong Ting Xi — I dunno\n- Heah Jun Bin — I dunno"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Mission -->
+            <TextView
+                android:id="@+id/missionTitle"
+                android:text="Our Mission"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/missionStatement"
+                android:text="Our mission is to create a platform where students can share assignments, past years, mid-term exams, and quiz answers to foster collaborative learning."
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- File Naming Convention -->
+            <TextView
+                android:id="@+id/fileNamingTitle"
+                android:text="File Naming Convention"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/fileNamingRules"
+                android:text="[CourseCode]_[AssignmentType]_[Year/Semester]_[OptionalTopic]\n\nExamples:\nCSC101_Assignment_2024S1_Recursion.pdf\nMGT202_PastYear_2023S2.pdf\nMTH301_Quiz_2024S1_Calculus1.pdf"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

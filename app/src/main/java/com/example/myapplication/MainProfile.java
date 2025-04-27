@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -41,6 +43,15 @@ public class MainProfile extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_interface);
+
+        // Set up the Toolbar as the ActionBar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        setSupportActionBar(toolbar);
+
+        // Set the back button (home) in the toolbar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         //For API 26++
         // call once in Application.onCreate()
@@ -180,4 +191,15 @@ public class MainProfile extends AppCompatActivity {
 
 
     }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Check if the item is the "home" button (back button)
+            if (item.getItemId() == android.R.id.home) {
+                // Navigate back to the main menu or previous activity
+                onBackPressed();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
 }

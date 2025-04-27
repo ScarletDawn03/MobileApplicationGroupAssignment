@@ -110,7 +110,7 @@ public class uploadPassyear extends AppCompatActivity {
         upl_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                code = upl_code.getText().toString().trim();
+                code = upl_code.getText().toString().trim().replaceAll("\\s+", "").toUpperCase();
                 name = upl_name.getText().toString().trim();
                 category = upl_category.getSelectedItem().toString();
                 desc = upl_desc.getText().toString().trim();
@@ -151,6 +151,7 @@ public class uploadPassyear extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
+
     private void addCourseToDB(String code, String name, String category, String desc,String filename,String pdfUrl,String author){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());

@@ -36,8 +36,29 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         }
 
         SourceDocumentModelClass course = courseList.get(position);
-        holder.title.setText(course.getCr_name());
-        holder.category.setText(course.getCr_category());
+        // Set the PDF name
+        String pdfName = course.getCr_pdfName();  // Assuming the field is cr_pdfName
+        if (pdfName != null && !pdfName.isEmpty()) {
+            holder.pdfName.setText(pdfName);  // Set the PDF name in the TextView
+        } else {
+            holder.pdfName.setText("No PDF Name");  // Set default text if PDF name is missing
+        }
+
+        // Set the created_at field
+        String createdAt = course.getCreated_at();  // Assuming the field is created_at
+        if (createdAt != null && !createdAt.isEmpty()) {
+            holder.createdAt.setText("Created At: " + createdAt);  // Display "Created At"
+        } else {
+            holder.createdAt.setText("Creation date not available");
+        }
+
+        // Set the created_by field
+        String createdBy = course.getCreated_by();  // Assuming the field is created_by
+        if (createdBy != null && !createdBy.isEmpty()) {
+            holder.createdBy.setText("Created By: " + createdBy);  // Display "Created By"
+        } else {
+            holder.createdBy.setText("Creator not available");
+        }
 
         // Set up a listener to open the PDF URL when clicked
         holder.itemView.setOnClickListener(v -> {
@@ -57,12 +78,13 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title, category;
+        TextView pdfName, createdAt, createdBy;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.course_title);
-            category = itemView.findViewById(R.id.course_category);
+            pdfName = itemView.findViewById(R.id.pdf_name);
+            createdAt = itemView.findViewById(R.id.created_at);
+            createdBy = itemView.findViewById(R.id.created_by);
         }
     }
 }

@@ -54,6 +54,10 @@
             android:name=".AboutUsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".MyUploadsActivity"
+            android:exported="false" />
+
         <!-- Added Profile Module -->
         <activity
             android:name=".MainProfile"

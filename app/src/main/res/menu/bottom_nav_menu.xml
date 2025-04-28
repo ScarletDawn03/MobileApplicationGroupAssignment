@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_search"
+        android:id="@+id/nav_myUpload"
         android:icon="@drawable/search"
-        android:title="Search" />
+        android:title="MyUploads" />
 
     <item
         android:id="@+id/nav_upload"

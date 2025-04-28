@@ -5,9 +5,14 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar; // FIXED: correct Toolbar import
@@ -16,6 +21,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -29,6 +35,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
@@ -38,12 +48,33 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private TextView welcomeText;
 
+    private ImageView quoteImageView;
+    private DatabaseReference quotesRef;
+    private List<String> quoteUrls;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         welcomeText = findViewById(R.id.welcome_text);
+
+
+        quoteImageView = findViewById(R.id.quoteImageView);
+
+        quoteUrls = new ArrayList<>();
+        quotesRef = FirebaseDatabase.getInstance().getReference("quotes");
+
+
+        TextView fakeSearchBar = findViewById(R.id.fakeSearchBar);
+        fakeSearchBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CourseSearchActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
 
         //GET STORAGE PERMISSION
@@ -79,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
         );
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+        fetchRandomQuote();
 
         // Handle Navigation Drawer item clicks
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -120,9 +153,8 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            if (id == R.id.nav_search) {
-                // Navigate to CourseSearchActivity
-                Intent intent = new Intent(MainActivity.this, CourseSearchActivity.class);
+            if (id == R.id.nav_myUpload) {
+                Intent intent = new Intent(MainActivity.this, MyUploadsActivity.class);
                 startActivity(intent);
                 return true;
             } else if (id == R.id.nav_upload) {
@@ -180,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -193,10 +226,51 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    // Optional: Fragment loading utility
-    private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.nav_host_fragment, fragment)
-                .commit();
+
+    private void fetchRandomQuote() {
+        quotesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                quoteUrls.clear();
+
+                if (!snapshot.exists()) {
+                    Log.d("RandomQuote", "No data found in Firebase");
+                    return;
+                }
+
+                for (DataSnapshot quoteSnapshot : snapshot.getChildren()) {
+                    String url = quoteSnapshot.getValue(String.class);
+                    if (url != null) {
+                        quoteUrls.add(url);
+                        Log.d("RandomQuote", "Retrieved URL: " + url);  // Log each URL
+                    }
+                }
+
+                if (!quoteUrls.isEmpty()) {
+                    // Pick a random image
+                    Random random = new Random();
+                    int randomIndex = random.nextInt(quoteUrls.size());
+                    String randomUrl = quoteUrls.get(randomIndex);
+                    Log.d("RandomQuote", "Selected URL: " + randomUrl);  // Log the randomly selected URL
+
+                    // Load it into the ImageView
+                    Glide.with(MainActivity.this)
+                            .load(randomUrl)
+                            .into(quoteImageView);
+                } else {
+                    Log.d("RandomQuote", "No URLs found in Firebase");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("RandomQuote", "Failed to load quote: " + error.getMessage());
+            }
+        });
     }
+
+
+
+
+
 }

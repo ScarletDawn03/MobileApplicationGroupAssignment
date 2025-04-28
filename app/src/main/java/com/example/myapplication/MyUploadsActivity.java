@@ -1,0 +1,137 @@
+package com.example.myapplication;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MyUploadsActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private MyUploadsAdapter adapter;
+    private List<UploadItem> uploadItemList;
+    private DatabaseReference coursesRef;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_my_uploads);
+
+
+        Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        setSupportActionBar(toolbar);
+
+        // Set the back button (home) in the toolbar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        recyclerView = findViewById(R.id.recycler_view_uploads);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        uploadItemList = new ArrayList<>();
+        adapter = new MyUploadsAdapter(uploadItemList,this);
+        recyclerView.setAdapter(adapter);
+
+        coursesRef = FirebaseDatabase.getInstance().getReference("courses");
+
+        loadMyUploads();
+    }
+
+    private void loadMyUploads() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String userEmail = sharedPreferences.getString("user_email", null);
+
+        if (userEmail == null) {
+            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        coursesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                uploadItemList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    UploadItem item = dataSnapshot.getValue(UploadItem.class);
+                    if (item != null && userEmail.equals(item.getCreated_by())) {
+                        uploadItemList.add(item);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MyUploadsActivity.this, "Failed to load uploads.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    public void deleteUpload(UploadItem uploadItem, int position) {
+        Log.d("MyUploadsActivity", "Deleting item: " + " at position: " + position);
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Upload")
+                .setMessage("Are you sure you want to delete \"" + uploadItem.getCr_pdfName() + "\"?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Step 1: Delete from Firebase Storage
+                    StorageReference fileRef = FirebaseStorage.getInstance().getReferenceFromUrl(uploadItem.getCr_pdfUrl());
+                    fileRef.delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // Step 2: Delete from Firebase Database
+                                DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("courses");
+                                dbRef.child(uploadItem.getKey()).removeValue()
+                                        .addOnSuccessListener(aVoid1 -> {
+                                            // Step 3: Update RecyclerView
+                                            if (position >= 0 && position < uploadItemList.size()) {
+                                                uploadItemList.remove(position);
+                                                runOnUiThread(() -> {
+                                                    adapter.notifyItemRemoved(position);
+                                                    adapter.notifyItemRangeChanged(position, uploadItemList.size());
+                                                });
+                                                Toast.makeText(this, "Upload deleted successfully", Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Failed to delete record", Toast.LENGTH_SHORT).show();
+                                        });
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to delete file", Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Check if the item is the "home" button (back button)
+        if (item.getItemId() == android.R.id.home) {
+            // Navigate back to the main menu or previous activity
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+}

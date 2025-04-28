@@ -26,23 +26,50 @@
             android:textColor="@android:color/black"
             android:paddingTop="8dp" />
 
-        <TextView
-            android:id="@+id/created_at"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Created At"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            android:paddingTop="4dp" />
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical"
+            android:paddingTop="8dp">
 
-        <TextView
-            android:id="@+id/created_by"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Created By"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            android:paddingTop="4dp" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:gravity="start|center_vertical"
+                android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/created_at"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Created At"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:paddingTop="4dp" />
+
+            <TextView
+                android:id="@+id/created_by"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Created By"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:paddingTop="4dp" />
+        </LinearLayout>
+
+        <!-- Like Button -->
+        <ImageView
+            android:id="@+id/like_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/unlike"
+            android:contentDescription="Like Button"
+            android:layout_gravity="end" /> <!-- Ensures the button is aligned to the right -->
 
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+    </androidx.cardview.widget.CardView>

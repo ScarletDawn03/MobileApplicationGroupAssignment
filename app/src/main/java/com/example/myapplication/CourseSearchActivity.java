@@ -13,6 +13,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,7 +33,7 @@ public class CourseSearchActivity extends AppCompatActivity {
     private SearchView searchView;
     private Spinner categorySpinner;
     private RecyclerView recyclerView;
-    private List<SourceDocumentModelClass> courseList = new ArrayList<>();
+    private List<SourceDocumentModelClass> courseList;
     private CourseAdapter adapter;
 
     private FirebaseDatabase db;
@@ -53,6 +54,8 @@ public class CourseSearchActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        courseList = new ArrayList<>();
 
 
         searchView = findViewById(R.id.search_view);
@@ -82,13 +85,16 @@ public class CourseSearchActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_view);
         searchButton = findViewById(R.id.search_course_button);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CourseAdapter(courseList);
-        recyclerView.setAdapter(adapter);
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         db = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
         documentsRef = db.getReference("courses");  // Correct reference to 'courses' node
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CourseAdapter(courseList, documentsRef, userEmail);
+        recyclerView.setAdapter(adapter);
+
 
         // Set up the search button click listener
         searchButton.setOnClickListener(v -> {
@@ -182,6 +188,46 @@ public class CourseSearchActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void likeDocument(String documentId, String userEmail) {
+        DatabaseReference documentRef = documentsRef.child(documentId);
+
+        documentRef.child("liked_by").child(userEmail).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    Toast.makeText(CourseSearchActivity.this, "You have already liked this document", Toast.LENGTH_SHORT).show();
+                } else {
+                    documentRef.child("likes").get().addOnCompleteListener(likeTask -> {
+                        if (likeTask.isSuccessful()) {
+                            Integer currentLikes = likeTask.getResult().getValue(Integer.class);
+                            if (currentLikes == null) {
+                                currentLikes = 0;
+                            }
+                            documentRef.child("likes").setValue(currentLikes + 1);
+
+                            for (int i = 0; i < courseList.size(); i++) {
+                                SourceDocumentModelClass course = courseList.get(i);
+                                if (course.getKey().equals(documentId)) {
+                                    course.setLikes(currentLikes + 1);
+                                    adapter.notifyItemChanged(i);
+                                    break;
+                                }
+                            }
+
+                            documentRef.child("liked_by").child(userEmail).setValue(true)
+                                    .addOnCompleteListener(likeUpdateTask -> {
+                                        if (likeUpdateTask.isSuccessful()) {
+                                            Toast.makeText(CourseSearchActivity.this, "You liked this document!", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(CourseSearchActivity.this, "Failed to update like", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    });
+                }
+            }
+        });
     }
 
 }

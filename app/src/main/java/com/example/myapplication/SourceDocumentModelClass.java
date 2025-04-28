@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SourceDocumentModelClass {
     private String cr_category;
     private String cr_code;
@@ -11,12 +14,15 @@ public class SourceDocumentModelClass {
     private String created_by;
     private String key;
 
+    private int likes;          // The number of likes for the course
+    private Map<String, Boolean> liked_by; // Users who liked the course
+
     // Required empty constructor (for Firebase)
     public SourceDocumentModelClass() {}
 
     // Constructor
     public SourceDocumentModelClass(String cr_category, String cr_code, String cr_desc, String cr_name,
-                                    String cr_pdfName, String cr_pdfUrl, String created_at, String created_by, String key) {
+                                    String cr_pdfName, String cr_pdfUrl, String created_at, String created_by, String key , int likes, Map<String, Boolean> liked_by) {
         this.cr_category = cr_category;
         this.cr_code = cr_code;
         this.cr_desc = cr_desc;
@@ -26,6 +32,8 @@ public class SourceDocumentModelClass {
         this.created_at = created_at;
         this.created_by=created_by;
         this.key = key;
+        this.likes = likes;
+        this.liked_by = (liked_by != null) ? liked_by : new HashMap<>();
     }
 
     // Getters and Setters
@@ -94,5 +102,21 @@ public class SourceDocumentModelClass {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public Map<String, Boolean> getLiked_by() {
+        return liked_by;
+    }
+
+    public void setLiked_by(Map<String, Boolean> liked_by) {
+        this.liked_by = liked_by;
     }
 }

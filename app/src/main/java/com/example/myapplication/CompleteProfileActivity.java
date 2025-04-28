@@ -6,9 +6,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -30,7 +34,8 @@ import java.util.Calendar;
 
 public class CompleteProfileActivity extends AppCompatActivity {
 
-    private EditText fullNameField, contactNumberField, dateOfBirthField, genderField;
+    private EditText fullNameField, contactNumberField, dateOfBirthField;
+    private Spinner genderSpinner;
     private Button saveProfileBtn, cancelBtn, uploadImageBtn;
     private ImageView profilePhotoView, selectedPhotoView;
 
@@ -57,7 +62,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         fullNameField = findViewById(R.id.et_fullname);
         contactNumberField = findViewById(R.id.et_contactNumber);
         dateOfBirthField = findViewById(R.id.et_dateOfBirth);
-        genderField = findViewById(R.id.et_gender);
+        genderSpinner = findViewById(R.id.spinner_gender);
         profilePhotoView = findViewById(R.id.iv_profile_photo);
         selectedPhotoView = findViewById(R.id.iv_selected_photo);
         saveProfileBtn = findViewById(R.id.btn_saveProfile);
@@ -70,6 +75,11 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // Gender Spinner setup
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.gender_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        genderSpinner.setAdapter(adapter);
 
         // Date picker
         dateOfBirthField.setOnClickListener(v -> showDatePicker());
@@ -120,8 +130,8 @@ public class CompleteProfileActivity extends AppCompatActivity {
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
                         selectedPhotoView.setImageBitmap(bitmap);
-                        selectedPhotoView.setVisibility(ImageView.VISIBLE);
-                        profilePhotoView.setVisibility(ImageView.INVISIBLE); // Hide default image
+                        selectedPhotoView.setVisibility(View.VISIBLE);
+                        profilePhotoView.setVisibility(View.INVISIBLE); // Hide default image
                         uploadImageBtn.setText("Image Selected");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -133,7 +143,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         String fullName = fullNameField.getText().toString().trim();
         String contactNumber = contactNumberField.getText().toString().trim();
         String dateOfBirth = dateOfBirthField.getText().toString().trim();
-        String gender = genderField.getText().toString().trim();
+        String gender = genderSpinner.getSelectedItem().toString();
 
         if (fullName.isEmpty() || contactNumber.isEmpty() || dateOfBirth.isEmpty() || gender.isEmpty()) {
             Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();

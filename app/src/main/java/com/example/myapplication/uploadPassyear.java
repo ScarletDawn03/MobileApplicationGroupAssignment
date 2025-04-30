@@ -259,7 +259,7 @@ public class uploadPassyear extends AppCompatActivity {
                         Toast.makeText(this, "Upload Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         } else {
-            Toast.makeText(this, "Please select a PDF first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select a document first", Toast.LENGTH_SHORT).show();
         }
     }
 

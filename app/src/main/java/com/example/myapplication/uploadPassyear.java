@@ -75,7 +75,7 @@ public class uploadPassyear extends AppCompatActivity {
                                 fileType = getContentResolver().getType(pdfuri);
                                 //Check size of file uploaded
                                 if(filesizeInByte > maxfileSize){
-                                    Toast.makeText(uploadPassyear.this, "Only PDF file below 15MB can be uploaded!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(uploadPassyear.this, "Only document file below 15MB can be uploaded!", Toast.LENGTH_LONG).show();
                                     pdfuri = null;
                                     return;
                                 }
@@ -230,11 +230,11 @@ public class uploadPassyear extends AppCompatActivity {
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
             String timeStamp = sdf.format(new Date());
-            if(fileType == ".doc"){
+            if("application/msword".equals(fileType)){
                 fileName =  fileExtName+"_"+timeStamp+ ".doc";
-            }else if(fileType == ".docx"){
+            }else if("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(fileType)){
                 fileName =  fileExtName+"_"+timeStamp+ ".docx";
-            }else if(fileType == ".pdf"){
+            }else if("application/pdf".equals(fileType)){
                 fileName =  fileExtName+"_"+timeStamp+ ".pdf";
             }
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
@@ -246,6 +246,7 @@ public class uploadPassyear extends AppCompatActivity {
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                             String pdfUrl = uri.toString();
                             addCourseToDB(code,name,category,desc,fileName,pdfUrl,userEmail);
+                            fileExtName = null;
                         });
 
                         // Save successful update to SharedPreferences

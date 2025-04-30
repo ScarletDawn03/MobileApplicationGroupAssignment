@@ -45,7 +45,7 @@ public class uploadPassyear extends AppCompatActivity {
     private TextInputLayout upl_desc_layout;
     private TextInputEditText upl_desc;
     private Button upl_btn,selectFile_btn,rst_uplbtn;
-    private String fileName,fileOrgName,fileExtName,code,name,category,desc;
+    private String fileName,fileOrgName,fileExtName,fileType,code,name,category,desc;
     private Uri pdfuri;
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -66,10 +66,13 @@ public class uploadPassyear extends AppCompatActivity {
                                 int filesize = returnCursor.getColumnIndex(OpenableColumns.SIZE);
                                 long filesizeInByte = returnCursor.getLong(filesize);
                                 long maxfileSize = 15 * 1024 * 1024;
-                                fileOrgName = returnCursor.getString(nameIndex);
-                                returnCursor.close();
-                                fileExtName = fileOrgName.substring(0,fileOrgName.length()-4);
 
+                                fileOrgName = returnCursor.getString(nameIndex);
+                                int dotIndex = fileOrgName.lastIndexOf(".");
+
+                                returnCursor.close();
+                                fileExtName = fileOrgName.substring(0,dotIndex); //Dynamically retreive file name
+                                fileType = getContentResolver().getType(pdfuri);
                                 //Check size of file uploaded
                                 if(filesizeInByte > maxfileSize){
                                     Toast.makeText(uploadPassyear.this, "Only PDF file below 15MB can be uploaded!", Toast.LENGTH_LONG).show();
@@ -116,7 +119,7 @@ public class uploadPassyear extends AppCompatActivity {
                 desc = upl_desc.getText().toString().trim();
 
                 if (pdfuri == null) {
-                    Toast.makeText(uploadPassyear.this, "Please select a pdf first", Toast.LENGTH_LONG).show();
+                    Toast.makeText(uploadPassyear.this, "Please select a document first", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -214,7 +217,10 @@ public class uploadPassyear extends AppCompatActivity {
 
     public void openFile(View view){
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/pdf");
+        intent.setType("*/*");
+        //Set the limit which only can upload .pdf, .doc, and .docx
+        String[] mimeType = {"application/pdf","application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType);
         filePickerLauncher.launch(intent);
     }
 
@@ -224,7 +230,13 @@ public class uploadPassyear extends AppCompatActivity {
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
             String timeStamp = sdf.format(new Date());
-            fileName =  fileExtName+"_"+timeStamp+ ".pdf";
+            if(fileType == ".doc"){
+                fileName =  fileExtName+"_"+timeStamp+ ".doc";
+            }else if(fileType == ".docx"){
+                fileName =  fileExtName+"_"+timeStamp+ ".docx";
+            }else if(fileType == ".pdf"){
+                fileName =  fileExtName+"_"+timeStamp+ ".pdf";
+            }
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
 
             SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);

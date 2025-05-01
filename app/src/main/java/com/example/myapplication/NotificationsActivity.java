@@ -3,14 +3,10 @@ package com.example.myapplication;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,122 +17,82 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NotificationsActivity extends AppCompatActivity {
-
-    private RecyclerView notificationsRecyclerView;
+    private static final String TAG = "NotificationsActivity";
     private NotificationsAdapter adapter;
-    private List<String> updatesList = new ArrayList<>();
+    private final List<String> notificationsList = new ArrayList<>();
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        // Set up the Toolbar as the ActionBar
-        Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        // Initialize toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Set the back button (home) in the toolbar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        // Initialize RecyclerView
+        recyclerView = findViewById(R.id.notificationsRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        notificationsRecyclerView = findViewById(R.id.notificationsRecyclerView);
+        // Initialize adapter with empty list
+        adapter = new NotificationsAdapter(new ArrayList<>(), this);
+        recyclerView.setAdapter(adapter);
 
-        // Load updates from SharedPreferences
-        loadUpdatesFromPreferences();
-
-        notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NotificationsAdapter(updatesList, this);
-        notificationsRecyclerView.setAdapter(adapter);
+        // Load initial data
+        loadNotifications();
     }
 
-    // Method to load updates from SharedPreferences
-    private void loadUpdatesFromPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        String existingUpdates = sharedPreferences.getString("update_list", "");
+    private void loadNotifications() {
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String savedNotifications = prefs.getString("update_list", "").trim(); // Trim whitespace
 
-        // Clear the list to ensure we're reloading it fresh
-        updatesList.clear();
+        notificationsList.clear();
 
-        if (!existingUpdates.isEmpty()) {
-            String[] updatesArray = existingUpdates.split("\n");
-            updatesList.addAll(Arrays.asList(updatesArray));
-        }
-    }
-
-    // NotificationsAdapter class for managing RecyclerView
-    public static class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder> {
-        private List<String> updates;
-        private Context context;
-
-        public NotificationsAdapter(List<String> updates, Context context) {
-            this.updates = updates;
-            this.context = context;
-        }
-
-        @NonNull
-        @Override
-        public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_update, parent, false);
-            return new NotificationViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
-            String update = updates.get(position);
-            holder.notificationText.setText(update);
-
-            // Set an OnClickListener to the X button to remove the update
-            holder.removeUpdateButton.setOnClickListener(v -> {
-                // Call removeUpdateFromPreferences when X button is clicked
-                removeUpdateFromPreferences(update);
-
-                // Remove the update from the list and notify the adapter
-                updates.remove(position);
-                notifyItemRemoved(position);
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return updates.size();
-        }
-
-        // Method to remove an update from SharedPreferences
-        private void removeUpdateFromPreferences(String updateToRemove) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-            String existingUpdates = sharedPreferences.getString("update_list", "");
-
-            // Remove the selected update from the string
-            String updatedUpdates = existingUpdates.replace("\n" + updateToRemove, "");
-
-            // Save the updated list back to SharedPreferences
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("update_list", updatedUpdates.trim());  // Make sure there's no trailing newline
-            editor.apply();
-        }
-
-        public static class NotificationViewHolder extends RecyclerView.ViewHolder {
-            TextView notificationText;
-            ImageView removeUpdateButton; // X button
-
-            public NotificationViewHolder(@NonNull View itemView) {
-                super(itemView);
-                notificationText = itemView.findViewById(R.id.updateTextView);
-                removeUpdateButton = itemView.findViewById(R.id.removeImageView); // X button
+        if (!savedNotifications.isEmpty()) {
+            // Split and filter out empty strings
+            String[] notificationsArray = savedNotifications.split("\n");
+            for (String notification : notificationsArray) {
+                if (!notification.trim().isEmpty()) {  // Only add non-empty strings
+                    notificationsList.add(notification.trim());
+                }
             }
+            Log.d(TAG, "Loaded " + notificationsList.size() + " notifications");
+        } else {
+            Log.d(TAG, "No notifications found in preferences");
+        }
+
+        updateAdapterData();
+    }
+
+    private void updateAdapterData() {
+        if (adapter != null) {
+            adapter.updateData(notificationsList);
+        } else {
+            Log.e(TAG, "Adapter is null when trying to update data");
         }
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadNotifications(); // Refresh data when returning to activity
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Check if the item is the "home" button (back button)
         if (item.getItemId() == android.R.id.home) {
-            // Navigate back to the main menu or previous activity
             onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // Helper method to show toast messages for debugging
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

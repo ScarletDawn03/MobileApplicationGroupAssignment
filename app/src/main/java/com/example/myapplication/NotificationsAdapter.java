@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder> {
@@ -34,35 +36,43 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         String update = updates.get(position);
         holder.notificationText.setText(update);
 
-        // Set an OnClickListener to the X button to remove the update
         holder.removeUpdateButton.setOnClickListener(v -> {
-            // Call removeUpdateFromPreferences when X button is clicked
-            removeUpdateFromPreferences(update);
-
-            // Remove the update from the list and notify the adapter
-            updates.remove(position);
-            notifyItemRemoved(position);
+            int pos = holder.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                String itemToRemove = updates.get(pos);
+                removeUpdateFromPreferences(itemToRemove);
+                updates.remove(pos);
+                notifyItemRemoved(pos);
+            }
         });
     }
+
 
     @Override
     public int getItemCount() {
         return updates.size();
     }
 
-    // Method to remove an update from SharedPreferences
     private void removeUpdateFromPreferences(String updateToRemove) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         String existingUpdates = sharedPreferences.getString("update_list", "");
 
-        // Remove the selected update from the string
-        String updatedUpdates = existingUpdates.replace("\n" + updateToRemove, "");
+        List<String> updatesList = new ArrayList<>(Arrays.asList(existingUpdates.split("\n")));
+        updatesList.remove(updateToRemove);
 
-        // Save the updated list back to SharedPreferences
+        String updatedUpdates = String.join("\n", updatesList);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("update_list", updatedUpdates);
         editor.apply();
     }
+
+    public void updateData(List<String> updatedList) {
+        updates.clear();
+        updates.addAll(updatedList);
+        notifyDataSetChanged();  // This will refresh the RecyclerView with the updated list
+    }
+
+
 
     public static class NotificationViewHolder extends RecyclerView.ViewHolder {
         TextView notificationText;
@@ -74,4 +84,5 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             removeUpdateButton = itemView.findViewById(R.id.removeImageView); // X button
         }
     }
+
 }

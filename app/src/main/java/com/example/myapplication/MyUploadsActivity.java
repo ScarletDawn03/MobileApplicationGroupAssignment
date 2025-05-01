@@ -66,7 +66,7 @@ public class MyUploadsActivity extends AppCompatActivity {
             return;
         }
 
-        coursesRef.addValueEventListener(new ValueEventListener() {
+        coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 uploadItemList.clear();
@@ -87,29 +87,23 @@ public class MyUploadsActivity extends AppCompatActivity {
     }
 
 
+
     public void deleteUpload(UploadItem uploadItem, int position) {
-        Log.d("MyUploadsActivity", "Deleting item: " + " at position: " + position);
         new AlertDialog.Builder(this)
                 .setTitle("Delete Upload")
                 .setMessage("Are you sure you want to delete \"" + uploadItem.getCr_pdfName() + "\"?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    // Step 1: Delete from Firebase Storage
                     StorageReference fileRef = FirebaseStorage.getInstance().getReferenceFromUrl(uploadItem.getCr_pdfUrl());
                     fileRef.delete()
                             .addOnSuccessListener(aVoid -> {
-                                // Step 2: Delete from Firebase Database
                                 DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("courses");
                                 dbRef.child(uploadItem.getKey()).removeValue()
                                         .addOnSuccessListener(aVoid1 -> {
-                                            // Step 3: Update RecyclerView
-                                            if (position >= 0 && position < uploadItemList.size()) {
-                                                uploadItemList.remove(position);
-                                                runOnUiThread(() -> {
-                                                    adapter.notifyItemRemoved(position);
-                                                    adapter.notifyItemRangeChanged(position, uploadItemList.size());
-                                                });
-                                                Toast.makeText(this, "Upload deleted successfully", Toast.LENGTH_SHORT).show();
-                                            }
+                                            // ✅ Manually remove from local list and notify adapter
+                                            uploadItemList.remove(position);
+                                            adapter.notifyItemRemoved(position);
+                                            adapter.notifyItemRangeChanged(position, uploadItemList.size());
+                                            Toast.makeText(this, "Upload deleted successfully", Toast.LENGTH_SHORT).show();
                                         })
                                         .addOnFailureListener(e -> {
                                             Toast.makeText(this, "Failed to delete record", Toast.LENGTH_SHORT).show();
@@ -122,6 +116,7 @@ public class MyUploadsActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

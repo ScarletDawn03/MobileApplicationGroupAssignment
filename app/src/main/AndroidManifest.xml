@@ -17,15 +17,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
-
-
+        <activity
+            android:name=".EditMyUpload"
+            android:exported="false" />
         <activity
             android:name=".CompleteProfileActivity"
             android:exported="false" />
         <activity
             android:name=".SignInActivity"
             android:exported="true" />
-
         <activity
             android:name=".myUpload"
             android:exported="false" />
@@ -37,50 +37,41 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Added CourseSearchActivity -->
+        </activity> <!-- Added CourseSearchActivity -->
         <activity
             android:name=".CourseSearchActivity"
             android:exported="false" />
-
         <activity
             android:name=".NotificationsActivity"
             android:exported="false" />
-
         <activity
             android:name=".AboutUsActivity"
             android:exported="false" />
-
         <activity
             android:name=".MyUploadsActivity"
-            android:exported="false" />
-
-        <!-- Added Profile Module -->
+            android:exported="false" /> <!-- Added Profile Module -->
         <activity
             android:name=".MainProfile"
             android:exported="false"
-            android:theme="@style/Theme.MyApplication"/>
-
-        <activity android:name=".ProfileActivity"
-            android:theme="@style/Theme.MyApplication"/>
-
-        <activity android:name=".AppThemeSettings"
-            android:theme="@style/Theme.MyApplication"/>
-
-
-        <activity android:name=".NotificationPreferences"
-            android:theme="@style/Theme.MyApplication"/>
-
-        <activity android:name=".PrivacySettings"
-            android:theme="@style/Theme.MyApplication"/>
-
-        <activity android:name=".AchievementActivity"
-            android:theme="@style/Theme.MyApplication"/>
-
-
+            android:theme="@style/Theme.MyApplication" />
+        <activity
+            android:name=".ProfileActivity"
+            android:theme="@style/Theme.MyApplication" />
+        <activity
+            android:name=".AppThemeSettings"
+            android:theme="@style/Theme.MyApplication" />
+        <activity
+            android:name=".NotificationPreferences"
+            android:theme="@style/Theme.MyApplication" />
+        <activity
+            android:name=".PrivacySettings"
+            android:theme="@style/Theme.MyApplication" />
+        <activity
+            android:name=".AchievementActivity"
+            android:theme="@style/Theme.MyApplication" />
     </application>
 
 </manifest>

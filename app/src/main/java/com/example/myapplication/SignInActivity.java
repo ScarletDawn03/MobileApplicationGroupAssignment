@@ -80,18 +80,30 @@ public class SignInActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 auth = FirebaseAuth.getInstance();
                                 FirebaseUser currentUser = auth.getCurrentUser();
+                                String email = currentUser.getEmail();
 
-                                Glide.with(SignInActivity.this)
-                                        .load(Objects.requireNonNull(currentUser).getPhotoUrl())
-                                        .into(imageView);
-                                name.setText(currentUser.getDisplayName());
-                                mail.setText(currentUser.getEmail());
+                                if (email != null && email.endsWith("@1utar.my")) {
+                                    Glide.with(SignInActivity.this)
+                                            .load(currentUser.getPhotoUrl())
+                                            .into(imageView);
 
-                                saveUserToDatabase(currentUser); //
+                                    name.setText(currentUser.getDisplayName());
+                                    mail.setText(currentUser.getEmail());
 
-                                startActivity(new Intent(SignInActivity.this, MainActivity.class));
-                                finish();
-                                Toast.makeText(SignInActivity.this, "Signed in successfully!", Toast.LENGTH_SHORT).show();
+                                    saveUserToDatabase(currentUser);
+
+                                    startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                                    finish();
+                                }
+                                else {
+                                    // Invalid email: sign out and show error message
+                                    FirebaseAuth.getInstance().signOut();
+                                    mGoogleSignInClient.signOut();
+
+                                    Toast.makeText(SignInActivity.this,
+                                            "Access denied. Please use your @1utar.my email.",
+                                            Toast.LENGTH_LONG).show();
+                                }
                             } else {
                                 Toast.makeText(SignInActivity.this, "Failed to sign in: " + task.getException(), Toast.LENGTH_SHORT).show();
                             }

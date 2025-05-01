@@ -49,6 +49,17 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
             context.startActivity(intent);
         });
 
+        holder.btnEditPdf.setOnClickListener(view ->{
+            Intent intent = new Intent(context, EditMyUpload.class);
+            intent.putExtra("cr_filename", item.getCr_pdfName());
+            intent.putExtra("cr_code", item.getCr_code());
+            intent.putExtra("cr_name", item.getCr_name());
+            intent.putExtra("cr_category", item.getCr_category());
+            intent.putExtra("cr_desc", item.getCr_desc());
+            intent.putExtra("key", item.getKey());
+            context.startActivity(intent);
+        });
+
         holder.deleteButton.setOnClickListener(view -> {
             Log.d("DeleteButton", "Delete button clicked");
             if (context instanceof MyUploadsActivity) {
@@ -64,7 +75,7 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
 
     static class UploadViewHolder extends RecyclerView.ViewHolder {
         TextView tvCourseCode, tvCourseName, tvCategory, tvCreatedAt, tvPdfName, deleteButton;
-        Button btnViewPdf;
+        Button btnViewPdf,btnEditPdf;
 
         public UploadViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +85,7 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvCreatedAt = itemView.findViewById(R.id.tvCreatedAt);
             btnViewPdf = itemView.findViewById(R.id.btnViewPdf);
+            btnEditPdf = itemView.findViewById(R.id.btnEditPdf);
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }
     }

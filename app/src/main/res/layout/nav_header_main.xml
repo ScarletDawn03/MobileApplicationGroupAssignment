@@ -12,7 +12,7 @@
 
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/photo"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:paddingTop="10dp"
@@ -29,7 +29,7 @@
         android:textColor="@android:color/white" />
 
     <TextView
-        android:id="@+id/nav_header_subtitle"
+        android:id="@+id/user_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="user@example.com"

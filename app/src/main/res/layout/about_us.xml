@@ -31,7 +31,9 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                />
 
             <!-- Our Team -->
             <TextView
@@ -42,11 +44,12 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/knewave"/>
 
             <TextView
                 android:id="@+id/teamMembers"
-                android:text="- Sim En Wei — 2206743\n- Jeremy Lim — I Dunno\n- Ong Ting Xi — I dunno\n- Heah Jun Bin — I dunno"
+                android:text="- Sim En Wei — 2206743\n- Jeremy Lim Yeu Shuo — 2207288\n- Ong Ting Xi — 2105077\n- Heah Jun Bin — 2103101"
                 android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -60,11 +63,12 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/knewave"/>
 
             <TextView
                 android:id="@+id/missionStatement"
-                android:text="Our mission is to create a platform where students can share assignments, past years, mid-term exams, and quiz answers to foster collaborative learning."
+                android:text="Our mission is to create a platform where students can share pratical test, past years, mid-term exams, and quiz answers to foster collaborative learning."
                 android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -78,11 +82,12 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/knewave"/>
 
             <TextView
                 android:id="@+id/fileNamingRules"
-                android:text="[CourseCode]_[AssignmentType]_[Year/Semester]_[OptionalTopic]\n\nExamples:\nCSC101_Assignment_2024S1_Recursion.pdf\nMGT202_PastYear_2023S2.pdf\nMTH301_Quiz_2024S1_Calculus1.pdf"
+                android:text="[CourseCode]_[AssignmentType]_[Month/Year]\n\nExamples:\nUCCN1122_PASTYEAR_MAY2023.pdf\nUALB1003_MidTerm_AUG2023.pdf\nUCCD2233_QUIZ_JAN2024.pdf"
                 android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

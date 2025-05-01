@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -23,12 +22,7 @@ public class AboutUsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // (Optional) You can findViewById TextViews here if you want to update them dynamically later
-        // Example:
-        // TextView title = findViewById(R.id.titleText);
-        // title.setText("New About Us Title");
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?> <!--    EN WEI-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-
     <item
         android:id="@+id/nav_search"
         android:icon="@drawable/search"
         android:title="Search" />
-
-    <item
-        android:id="@+id/nav_upload"
-        android:icon="@drawable/upload"
-        android:title="Upload" />
 
     <item
         android:id="@+id/nav_profile"
@@ -19,8 +12,20 @@
         android:title="Profile" />
 
     <item
+        android:id="@+id/nav_myUpload"
+        android:icon="@drawable/edit"
+        android:title="My Upload" />
+
+
+    <item
+        android:id="@+id/nav_upload"
+        android:icon="@drawable/cloud"
+        android:title="Upload" />
+
+
+    <item
         android:id="@+id/about_us"
-        android:icon="@drawable/aboutus"
+        android:icon="@drawable/i"
         android:title="About Us" />
 
     <item

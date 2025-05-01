@@ -6,7 +6,9 @@
     android:orientation="horizontal"
     android:padding="16dp"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/notification_background">
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/search_background">
 
     <TextView
         android:id="@+id/updateTextView"

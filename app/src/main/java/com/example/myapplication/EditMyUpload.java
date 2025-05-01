@@ -102,6 +102,8 @@ public class EditMyUpload extends AppCompatActivity {
                 setFormEnabled(true);
             }
         });
+
+
     }
 
     public void goMyUploadList(View view){
@@ -141,4 +143,12 @@ public class EditMyUpload extends AppCompatActivity {
         myupl_btn.setEnabled(enabled);
 
     }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed(); // This handles the default back behavior
+    }
+
+
+
+
 }

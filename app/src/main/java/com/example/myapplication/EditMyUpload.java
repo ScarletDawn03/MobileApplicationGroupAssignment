@@ -2,9 +2,12 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -38,6 +41,14 @@ public class EditMyUpload extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_my_upload);
 
+        // Initialize toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+
         filename = getIntent().getStringExtra("cr_filename");
         c_code = getIntent().getStringExtra("cr_code");
         c_name = getIntent().getStringExtra("cr_name");
@@ -46,6 +57,28 @@ public class EditMyUpload extends AppCompatActivity {
         c_key = getIntent().getStringExtra("key");
         setIDElement();
         setFormEnabled(true);
+
+        myupl_desc.addTextChangedListener(new TextWatcher() {
+            private final int max_length = 100;
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+          }
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+              if(s.length() > max_length){
+                  myupl_desc.setText(s.subSequence(0,max_length));
+                  myupl_desc.setSelection(max_length); // move cursor to end
+                  Toast.makeText(EditMyUpload.this, "Max 150 characters allowed", Toast.LENGTH_LONG).show();
+              }
+          }
+
+          @Override
+          public void afterTextChanged(Editable s) {
+
+          }
+        });
 
         myupl_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,8 +99,8 @@ public class EditMyUpload extends AppCompatActivity {
                     return;
                 }
 
-                if(category.equals("Select type of assessment")){
-                    ((TextView)myupl_category.getSelectedView()).setError("");
+                if (category.equals("Select type of assessment")) {
+                    ((TextView) myupl_category.getSelectedView()).setError("");
                     return;
                 }
 
@@ -75,7 +108,7 @@ public class EditMyUpload extends AppCompatActivity {
                     myupl_desc.setError("Please enter description");
                     return;
                 }
-                Toast.makeText(EditMyUpload.this,"Updating...Please wait... ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditMyUpload.this, "Updating...Please wait... ", Toast.LENGTH_SHORT).show();
                 setFormEnabled(false);
                 updatePDFAndSaveData();
             }

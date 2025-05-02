@@ -1,15 +1,20 @@
 package com.example.myapplication;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +32,18 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+//For notification
+import android.preference.PreferenceManager;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
+import androidx.core.content.ContextCompat;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DatabaseError;
+import android.Manifest;
+import android.content.pm.PackageManager;
+
 
 public class CourseSearchActivity extends AppCompatActivity {
 
@@ -41,10 +58,39 @@ public class CourseSearchActivity extends AppCompatActivity {
     private DatabaseReference documentsRef;
     private Button searchButton;
 
+    //For notification like
+    private static final int REQ_POST_NOTIFICATIONS = 1001;  // any unique int
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //For notification appear on the screen
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "likes_channel",
+                    "Likes & Comments",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Notifications when you like or someone likes your documents");
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(channel);
+
+        }
+
+        // 2) On Android 13+, prompt for the runtime permission if needed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{ Manifest.permission.POST_NOTIFICATIONS },
+                        REQ_POST_NOTIFICATIONS
+                );
+            }
+        }
+
         setContentView(R.layout.activity_course_search);
 
         // Set up the Toolbar as the ActionBar
@@ -88,9 +134,70 @@ public class CourseSearchActivity extends AppCompatActivity {
 
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
+        //To get current userid
+        String likerUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         db = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
         documentsRef = db.getReference("courses");  // Correct reference to 'courses' node
+
+        //Function for other people liking YOUR uploads:
+        documentsRef.orderByChild("created_by").equalTo(userEmail)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
+                        for (DataSnapshot courseSnap : snap.getChildren()) {
+                            String courseName = courseSnap.child("cr_name").getValue(String.class);
+                            String key = courseSnap.getKey();
+                            documentsRef.child(key).child("liked_by")
+                                    .addChildEventListener(new ChildEventListener() {
+                                        @Override public void onChildAdded(DataSnapshot likeSnap, String prev) {
+                                            String likerUid = likeSnap.getKey();
+                                            // Skip your own like:
+                                            if (!likerUid.equals(userEmail)){
+
+
+                                                boolean allowLikes = PreferenceManager
+                                                        .getDefaultSharedPreferences(CourseSearchActivity.this)
+                                                        .getBoolean("pref_notify_likes_comments", true);
+                                                if (allowLikes) {
+
+                                                    // 3 Build and fire the notification
+                                                    NotificationCompat.Builder notif = new NotificationCompat.Builder(CourseSearchActivity.this, "likes_channel")
+                                                            .setSmallIcon(R.drawable.favourite_icon)
+                                                            .setContentTitle("Someone liked your document")
+                                                            .setContentText(likerUid + " liked \"" + courseName + "\"")
+                                                            .setAutoCancel(true);
+                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                        if (ContextCompat.checkSelfPermission(CourseSearchActivity.this, Manifest.permission.POST_NOTIFICATIONS)
+                                                                == PackageManager.PERMISSION_GRANTED) {
+                                                            NotificationManagerCompat.from(CourseSearchActivity.this)
+                                                                    .notify((int) System.currentTimeMillis(), notif.build());
+                                                        } else {
+                                                            // Optional: ask for it here if you want:
+                                                            ActivityCompat.requestPermissions(
+                                                                    CourseSearchActivity.this,
+                                                                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                                                    REQ_POST_NOTIFICATIONS
+                                                            );
+                                                        }
+                                                    } else {
+                                                        // Pre-Android-13: no runtime permission needed
+                                                        NotificationManagerCompat.from(CourseSearchActivity.this)
+                                                                .notify((int) System.currentTimeMillis(), notif.build());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        @Override public void onChildChanged(DataSnapshot s, String p) {}
+                                        @Override public void onChildRemoved(DataSnapshot s) {}
+                                        @Override public void onChildMoved(DataSnapshot s, String p) {}
+                                        @Override public void onCancelled(DatabaseError e) {}
+                                    });
+                        }
+                    }
+                    @Override public void onCancelled(DatabaseError e) { }
+                });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CourseAdapter(courseList, documentsRef, userEmail);
@@ -192,6 +299,19 @@ public class CourseSearchActivity extends AppCompatActivity {
     }
 
     public void likeDocument(String documentId, String userEmail) {
+
+        //  Find the matching course in your in-memory list:
+        final String courseName;
+        String tempName = "";
+        for (SourceDocumentModelClass c : courseList) {
+            if (c.getKey().equals(documentId)) {
+                tempName = c.getCr_name();
+                break;
+            }
+        }
+
+        courseName=tempName;
+
         DatabaseReference documentRef = documentsRef.child(documentId);
 
         documentRef.child("liked_by").child(userEmail).get().addOnCompleteListener(task -> {
@@ -220,6 +340,40 @@ public class CourseSearchActivity extends AppCompatActivity {
                                     .addOnCompleteListener(likeUpdateTask -> {
                                         if (likeUpdateTask.isSuccessful()) {
                                             Toast.makeText(CourseSearchActivity.this, "You liked this document!", Toast.LENGTH_SHORT).show();
+
+                                            // 2: Read the user’s setting:
+                                            boolean allowLikes = PreferenceManager
+                                                    .getDefaultSharedPreferences(CourseSearchActivity.this)
+                                                    .getBoolean("pref_notify_likes_comments", true);
+
+                                            // 3: Only fire if they opted in:
+                                            if (allowLikes) {
+                                                NotificationCompat.Builder notif = new NotificationCompat.Builder(CourseSearchActivity.this, "likes_channel")
+                                                        .setSmallIcon(R.drawable.favourite_icon)
+                                                        .setContentTitle("You liked a document")
+                                                        .setContentText("You liked \"" + courseName + "\"")
+                                                        .setAutoCancel(true);
+
+                                                // 4: Permission-wrapped notify
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                    if (ContextCompat.checkSelfPermission(
+                                                            CourseSearchActivity.this,
+                                                            Manifest.permission.POST_NOTIFICATIONS
+                                                    ) == PackageManager.PERMISSION_GRANTED) {
+                                                        NotificationManagerCompat.from(CourseSearchActivity.this)
+                                                                .notify((int) System.currentTimeMillis(), notif.build());
+                                                    } else {
+                                                        ActivityCompat.requestPermissions(
+                                                                CourseSearchActivity.this,
+                                                                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                                                REQ_POST_NOTIFICATIONS
+                                                        );
+                                                    }
+                                                } else {
+                                                    NotificationManagerCompat.from(CourseSearchActivity.this)
+                                                            .notify((int) System.currentTimeMillis(), notif.build());
+                                                }
+                                            }
                                         } else {
                                             Toast.makeText(CourseSearchActivity.this, "Failed to update like", Toast.LENGTH_SHORT).show();
                                         }
@@ -229,6 +383,19 @@ public class CourseSearchActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+//Function to verify permission request
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_POST_NOTIFICATIONS &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

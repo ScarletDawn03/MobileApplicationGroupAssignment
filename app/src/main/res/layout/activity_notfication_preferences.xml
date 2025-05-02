@@ -21,7 +21,7 @@
         android:id="@+id/switchLikesComments"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Likes and Comments"
+        android:text="New Likes"
         android:layout_marginBottom="12dp"
         android:textColor="?android:attr/textColorPrimary"/>
 

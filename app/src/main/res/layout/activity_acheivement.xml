@@ -25,10 +25,18 @@
         android:id="@+id/tvCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Uploads: 0"
+        android:text="Total Uploads: 0"
         android:textSize="18sp"
         android:layout_gravity="center"
         android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/tvLatestUploadDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latest Upload: -"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp" />
 
     <ProgressBar
         style="@android:style/Widget.ProgressBar.Horizontal"

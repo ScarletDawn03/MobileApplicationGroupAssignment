@@ -7,11 +7,20 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.view.View;
@@ -39,6 +48,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+import android.Manifest; // for Manifest.permission.POST_NOTIFICATIONS
+import android.preference.PreferenceManager;// for retrieve notification preferences
+import android.content.SharedPreferences; // for shared preferences
+
 public class uploadPassyear extends AppCompatActivity {
     private TextView upl_code,upl_name,show_uplname;
     private Spinner upl_category;
@@ -50,6 +63,10 @@ public class uploadPassyear extends AppCompatActivity {
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference coursesRef = database.getReference("courses");
+
+    //For notification permission check and function
+    private static final int REQ_POST_NOTIFICATIONS = 1001;
+    private Notification pendingNotification;  // to hold the built notification
 
     private ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             //Unable use startActivityForResult directly as it deprecated
@@ -101,6 +118,19 @@ public class uploadPassyear extends AppCompatActivity {
         getIDForViews();
         setFormEnabled(true);
 
+        //For API level 26 above phone permission
+        // Create notification channel for local notifications
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel(
+                    "my_uploads",                     // channel ID
+                    "My Upload Notifications",        // user-visible name
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            chan.setDescription("Notifies you about your own uploads");
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(chan);
+        }
+
         rst_uplbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,6 +178,36 @@ public class uploadPassyear extends AppCompatActivity {
             }
         });
 
+    }
+
+    //Check for permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQ_POST_NOTIFICATIONS) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // Double-check we really have the permission (satisfies lint)
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.POST_NOTIFICATIONS)
+                        == PackageManager.PERMISSION_GRANTED) {
+
+                    // now that we have permission, finally show the notification
+                    if (pendingNotification != null) {
+                        NotificationManagerCompat.from(this)
+                                .notify((int) System.currentTimeMillis(), pendingNotification);
+                    }
+                }
+            } else {
+                Toast.makeText(this,
+                        "Cannot show notification without permission",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     public void goHome(View view){
@@ -254,6 +314,38 @@ public class uploadPassyear extends AppCompatActivity {
                         saveUpdateToPreferences(newUpdate);
 
                         Toast.makeText(uploadPassyear.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();
+
+                        // Get the user’s saved prefs
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                        boolean allowNewUploads = prefs.getBoolean("pref_notify_new_uploads", true);
+
+                        if (allowNewUploads) {
+                            // Build the notification
+                            NotificationCompat.Builder notif = new NotificationCompat.Builder(this, "my_uploads")
+                                    .setSmallIcon(R.drawable.upload)
+                                    .setContentTitle("Upload Complete")
+                                    .setContentText("You just uploaded: " + fileName)
+                                    .setAutoCancel(true);
+
+                            // Check runtime permission (Android 13+)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                                        == PackageManager.PERMISSION_GRANTED) {
+                                    NotificationManagerCompat.from(this)
+                                            .notify((int) System.currentTimeMillis(), notif.build());
+                                } else {
+                                    pendingNotification = notif.build();
+                                    ActivityCompat.requestPermissions(
+                                            this,
+                                            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                            REQ_POST_NOTIFICATIONS
+                                    );
+                                }
+                            } else {
+                                NotificationManagerCompat.from(this)
+                                        .notify((int) System.currentTimeMillis(), notif.build());
+                            }
+                        }
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Upload Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();

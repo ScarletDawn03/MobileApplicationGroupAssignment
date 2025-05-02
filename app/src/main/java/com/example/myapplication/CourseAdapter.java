@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +35,10 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
 
     private String userEmail;
 
-    public CourseAdapter(List<SourceDocumentModelClass> courseList, DatabaseReference databaseReference, String userEmail) {
+    private Context context;
+
+    public CourseAdapter(Context context,List<SourceDocumentModelClass> courseList, DatabaseReference databaseReference, String userEmail) {
+        this.context = context;
         this.courseList = courseList;
         this.databaseReference = databaseReference;
         this.userEmail = userEmail;
@@ -85,8 +89,15 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             updateLikeInDatabase(course.getKey(), updatedLikedByMap, v.getContext());
         });
 
+        holder.commentButton.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra("file_key", course.getKey()); // Pass the file/document ID
+            context.startActivity(intent);
+        });
 
-    // Set the PDF name
+
+
+        // Set the PDF name
         String pdfName = course.getCr_pdfName();  // Assuming the field is cr_pdfName
         if (pdfName != null && !pdfName.isEmpty()) {
             holder.pdfName.setText(pdfName);  // Set the PDF name in the TextView
@@ -165,12 +176,15 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         private TextView createdBy;
         private ImageView likeButton;
 
+        private ImageButton commentButton;
+
         public CourseViewHolder(View itemView) {
             super(itemView);
             pdfName = itemView.findViewById(R.id.pdf_name);  // TextView for course title
             createdAt = itemView.findViewById(R.id.created_at);  // TextView for course description
             createdBy = itemView.findViewById(R.id.created_by);  // TextView for course duration
             likeButton = itemView.findViewById(R.id.like_button);  // ImageView for like button
+            commentButton = itemView.findViewById(R.id.comment_button);
         }
 
         public void bind(SourceDocumentModelClass course, String pdfUrl) {
@@ -178,6 +192,8 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             pdfName.setText(course.getCr_pdfName());  // Course title
             createdAt.setText(course.getCreated_at());  // Course description
             createdBy.setText(course.getCreated_by());  // Course duration
+            commentButton = itemView.findViewById(R.id.comment_button);
+
         }
     }
 

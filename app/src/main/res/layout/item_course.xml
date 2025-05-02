@@ -58,16 +58,39 @@
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
                 android:paddingTop="4dp" />
-        </LinearLayout>
 
-        <!-- Like Button -->
-        <ImageView
-            android:id="@+id/like_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/unlike"
-            android:contentDescription="Like Button"
-            android:layout_gravity="end" /> <!-- Ensures the button is aligned to the right -->
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/button_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginTop="8dp">
+
+
+                <ImageButton
+                    android:id="@+id/comment_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/comment"
+                    android:contentDescription="Comment Button"
+                    android:padding="4dp"
+                    android:scaleType="centerInside"/>
+
+                <ImageView
+                    android:id="@+id/like_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/unlike"
+                    android:contentDescription="Like Button"
+                    android:padding="4dp"
+                    android:layout_marginEnd="16dp" />
+
+            </LinearLayout>
 
     </LinearLayout>
 

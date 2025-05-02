@@ -58,6 +58,7 @@ public class CourseSearchActivity extends AppCompatActivity {
     private DatabaseReference documentsRef;
     private Button searchButton;
 
+
     //For notification like
     private static final int REQ_POST_NOTIFICATIONS = 1001;  // any unique int
 
@@ -200,7 +201,7 @@ public class CourseSearchActivity extends AppCompatActivity {
                 });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CourseAdapter(courseList, documentsRef, userEmail);
+        adapter = new CourseAdapter(this, courseList, documentsRef, userEmail);
         recyclerView.setAdapter(adapter);
 
 

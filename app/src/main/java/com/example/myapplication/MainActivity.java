@@ -24,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
     private ImageView quoteImageView;
     private List<String> quoteUrls;
 
+    private TextView totalLikesText;
+
+    private DatabaseReference coursesRef;
+
+
+
+
 
     /**
      * Initializes activity UI and user session verification.
@@ -59,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         welcomeText = findViewById(R.id.welcome_text);
-
 
         quoteUrls = new ArrayList<>();
         quotesRef = FirebaseDatabase.getInstance().getReference("quotes");
@@ -80,6 +87,10 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        totalLikesText = findViewById(R.id.totalLikesText);
+        coursesRef = FirebaseDatabase.getInstance().getReference("courses");
+        fetchTotalLikes();
 
 
         // Set up the toolbar
@@ -320,5 +331,40 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to load profile: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
     }
+
+    private void fetchTotalLikes() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        if (currentUser == null) {
+            totalLikesText.setText("Total Likes: 0");
+            return;
+        }
+
+        String userEmail = currentUser.getEmail();
+
+        coursesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalLikes = 0;
+
+                for (DataSnapshot courseSnapshot : snapshot.getChildren()) {
+                    UploadItem item = courseSnapshot.getValue(UploadItem.class);
+                    if (item != null && userEmail.equals(item.getCreated_by())) {
+                        totalLikes += item.getLikes();
+                    }
+                }
+
+                totalLikesText.setText("Total Likes: " + totalLikes);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("MainActivity", "Failed to read likes", error.toException());
+            }
+        });
+    }
+
+
+
 
 }

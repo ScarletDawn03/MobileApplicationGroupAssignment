@@ -41,6 +41,7 @@ public class CourseSearchActivity extends AppCompatActivity {
     private DatabaseReference documentsRef;
     private Button searchButton;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -19,9 +19,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import android.content.Context;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseViewHolder> {
@@ -47,45 +50,43 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
 
     @Override
     public void onBindViewHolder(@NonNull CourseViewHolder holder, int position) {
-        if (courseList.isEmpty()) {
-            // Handle empty list (you could show a placeholder if desired)
-            return;
-        }
-
-        if (likedCourses == null) {
-            likedCourses = new HashSet<>();
-        }
+        if (courseList.isEmpty()) return;
 
         SourceDocumentModelClass course = courseList.get(position);
-
-        String pdfUrl = course.getCr_pdfUrl();  // Assume you have a method to get the URL
+        String pdfUrl = course.getCr_pdfUrl();
         holder.bind(course, pdfUrl);
 
+        // Safely initialize likedByMap
+        Map<String, Boolean> initialLikedByMap = course.getLiked_by();
+        final Map<String, Boolean> likedByMap = (initialLikedByMap != null) ? initialLikedByMap : new HashMap<>();
 
-        // Check if the course is already liked
-        if (likedCourses.contains(pdfUrl)) {
-            holder.likeButton.setImageResource(R.drawable.like);  // Change to "liked"
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        String safeEmail = userEmail.replace(".", "_");
+
+        if (likedByMap.containsKey(safeEmail) && likedByMap.get(safeEmail)) {
+            holder.likeButton.setImageResource(R.drawable.like);
         } else {
-            holder.likeButton.setImageResource(R.drawable.unlike);  // Change to "unliked"
+            holder.likeButton.setImageResource(R.drawable.unlike);
         }
 
-        // Handle the like button click event
         holder.likeButton.setOnClickListener(v -> {
-            if (likedCourses.contains(pdfUrl)) {
-                likedCourses.remove(pdfUrl);  // Remove from liked list
-                holder.likeButton.setImageResource(R.drawable.unlike);  // Change icon to "unlike"
+            Map<String, Boolean> updatedLikedByMap = new HashMap<>(likedByMap); // Safe now
+
+            if (updatedLikedByMap.containsKey(safeEmail)) {
+                updatedLikedByMap.remove(safeEmail);
+                holder.likeButton.setImageResource(R.drawable.unlike);
                 Toast.makeText(v.getContext(), "Unliked", Toast.LENGTH_SHORT).show();
-                updateLikeInDatabase(pdfUrl, false);  // Update in Firebase, "unlike"
             } else {
-                likedCourses.add(pdfUrl);  // Add to liked list
-                holder.likeButton.setImageResource(R.drawable.like);  // Change icon to "liked"
+                updatedLikedByMap.put(safeEmail, true);
+                holder.likeButton.setImageResource(R.drawable.like);
                 Toast.makeText(v.getContext(), "Liked", Toast.LENGTH_SHORT).show();
-                updateLikeInDatabase(pdfUrl, true);  // Update in Firebase, "like"
             }
+
+            updateLikeInDatabase(course.getKey(), updatedLikedByMap, v.getContext());
         });
 
 
-        // Set the PDF name
+    // Set the PDF name
         String pdfName = course.getCr_pdfName();  // Assuming the field is cr_pdfName
         if (pdfName != null && !pdfName.isEmpty()) {
             holder.pdfName.setText(pdfName);  // Set the PDF name in the TextView
@@ -126,63 +127,32 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         return courseList.size();
     }
 
-
-    // Method to update like status in Firebase
-    private void updateLikeInDatabase(String pdfUrl, boolean isLiked) {
-
+    private void updateLikeInDatabase(String documentId, Map<String, Boolean> likedByMap, Context context) {
         if (databaseReference == null) {
             databaseReference = FirebaseDatabase.getInstance().getReference("courses");
         }
 
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // assuming user is logged in
-        String safeEmail = userEmail.replace(".", "_"); // Safe format for email, to be used as the key in liked_by
+        // Reference to the course document by its unique documentId
+        DatabaseReference courseRef = databaseReference.child(documentId);
+        DatabaseReference likesRef = courseRef.child("likes");
+        DatabaseReference likedByRef = courseRef.child("liked_by");
 
-
-        // Find the course in Firebase by pdfUrl or documentId
-        databaseReference.orderByChild("cr_pdfUrl").equalTo(pdfUrl)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            String courseId = snapshot.getKey();  // Get the course's unique ID
-
-                            Log.d("Course ID", "Course ID: " + courseId);  // Log the course ID for debugging
-                            DatabaseReference courseRef = databaseReference.child(courseId);
-                            DatabaseReference likesRef = courseRef.child("likes");
-                            DatabaseReference likedByRef=courseRef.child("liked_by");
-
-                            if (isLiked) {
-
-                                likedByRef.child(safeEmail).setValue(true);
-
-                                // Increment like count
-                                likesRef.get().addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Integer currentLikes = task.getResult().getValue(Integer.class);
-                                        if (currentLikes == null) currentLikes = 0;
-                                        likesRef.setValue(currentLikes + 1);
-                                    }
-                                });
-                            } else {
-                                // Decrement the like count
-                                likedByRef.child(safeEmail).removeValue();
-
-                                // Decrement like count
-                                likesRef.get().addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Integer currentLikes = task.getResult().getValue(Integer.class);
-                                        if (currentLikes != null && currentLikes > 0) {
-                                            likesRef.setValue(currentLikes - 1);
-                                        }
-                                    }
-                                });
+        // Update the liked_by map with the current user's like status
+        likedByRef.setValue(likedByMap)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Get the current number of likes and update
+                        likesRef.get().addOnCompleteListener(likeTask -> {
+                            if (likeTask.isSuccessful()) {
+                                Integer currentLikes = likeTask.getResult().getValue(Integer.class);
+                                if (currentLikes == null) currentLikes = 0;
+                                // Update like count based on the size of the liked_by map
+                                int updatedLikes = likedByMap.size();
+                                likesRef.setValue(updatedLikes);
                             }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // Handle database error
+                        });
+                    } else {
+                        Toast.makeText(context, "Error updating like status", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

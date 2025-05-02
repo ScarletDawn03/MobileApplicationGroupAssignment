@@ -113,6 +113,9 @@ public class SourceDocumentModelClass {
     }
 
     public Map<String, Boolean> getLiked_by() {
+        if (liked_by == null) {
+            liked_by = new HashMap<>();
+        }
         return liked_by;
     }
 

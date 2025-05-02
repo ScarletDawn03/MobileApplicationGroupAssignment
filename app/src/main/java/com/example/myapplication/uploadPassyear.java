@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -123,9 +124,12 @@ public class uploadPassyear extends AppCompatActivity {
         getIDForViews();
         setFormEnabled(true);
 
-        // Set up the Toolbar as the ActionBar
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        // Initialize toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         //For API level 26 above phone permission
         // Create notification channel for local notifications
@@ -402,13 +406,10 @@ public class uploadPassyear extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Check if the item is the "home" button (back button)
         if (item.getItemId() == android.R.id.home) {
-            // Navigate back to the main menu or previous activity
             onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

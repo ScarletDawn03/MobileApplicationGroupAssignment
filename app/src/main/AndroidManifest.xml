@@ -38,9 +38,7 @@
         <activity
             android:name=".SignInActivity"
             android:exported="true" />
-        <activity
-            android:name=".myUpload"
-            android:exported="false" />
+
         <activity
             android:name=".uploadPassyear"
             android:exported="false" />
@@ -59,7 +57,7 @@
             android:exported="false" />
         <activity
             android:name=".MyUploadsActivity"
-            android:exported="false" /> <!-- Added Profile Module -->
+            android:exported="false" />
         <activity
             android:name=".MainProfile"
             android:exported="false"

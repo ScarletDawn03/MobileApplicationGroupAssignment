@@ -310,7 +310,7 @@ public class uploadPassyear extends AppCompatActivity {
                         });
 
                         // Save successful update to SharedPreferences
-                        String newUpdate = "Upload successful for " + fileName  + " to " + code + " " + category;
+                        String newUpdate = code + "," + category + " - " + "Upload successful for " + fileName ;
                         saveUpdateToPreferences(newUpdate);
 
                         Toast.makeText(uploadPassyear.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();

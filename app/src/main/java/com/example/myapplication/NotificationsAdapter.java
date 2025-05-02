@@ -19,6 +19,8 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     private List<String> updates;
     private Context context;
 
+
+
     public NotificationsAdapter(List<String> updates, Context context) {
         this.updates = updates;
         this.context = context;
@@ -36,6 +38,20 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         String update = updates.get(position);
         holder.notificationText.setText(update);
 
+        // Determine file type icon
+        ImageView fileTypeIcon = holder.fileTypeIcon;
+
+        if (update.endsWith(".pdf")) {
+            fileTypeIcon.setImageResource(R.drawable.pdf);
+        } else if (update.endsWith(".doc")) {
+            fileTypeIcon.setImageResource(R.drawable.doc);
+        } else if (update.endsWith(".docx")) {
+            fileTypeIcon.setImageResource(R.drawable.docx);
+        } else {
+            fileTypeIcon.setImageResource(R.drawable.pdf); // default
+        }
+
+        // Handle remove button
         holder.removeUpdateButton.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {
@@ -77,11 +93,13 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public static class NotificationViewHolder extends RecyclerView.ViewHolder {
         TextView notificationText;
         ImageView removeUpdateButton; // X button
+        ImageView fileTypeIcon; // Add this line
 
         public NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
             notificationText = itemView.findViewById(R.id.updateTextView);
             removeUpdateButton = itemView.findViewById(R.id.removeImageView); // X button
+            fileTypeIcon = itemView.findViewById(R.id.fileTypeIcon);
         }
     }
 

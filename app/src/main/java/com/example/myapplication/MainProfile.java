@@ -45,7 +45,7 @@ public class MainProfile extends AppCompatActivity {
         setContentView(R.layout.activity_profile_interface);
 
         // Set up the Toolbar as the ActionBar
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Set the back button (home) in the toolbar
@@ -120,7 +120,10 @@ public class MainProfile extends AppCompatActivity {
         dbRef.get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
                 String photoUrl = snapshot.child("profilePhotoUrl").getValue(String.class);
-                if (photoUrl != null) Glide.with(this).load(photoUrl).into(imgProfile);
+                // Check if the activity is not destroyed or finishing before loading the image
+                if (!isDestroyed() && !isFinishing() && photoUrl != null) {
+                    Glide.with(this).load(photoUrl).into(imgProfile);
+                }
 
                 tvName.setText(snapshot.child("fullName").getValue(String.class));
                 tvHandle.setText("@" + snapshot.child("username").getValue(String.class));

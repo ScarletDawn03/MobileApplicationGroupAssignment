@@ -6,7 +6,20 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+
+/**
+ * AboutUsActivity displays information about the application or the development team along side the naming convention of our files.
+ */
 public class AboutUsActivity extends AppCompatActivity {
+
+
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this Bundle contains the data it most recently supplied.
+     *                           Otherwise, it is null.
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +37,12 @@ public class AboutUsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Handles the selection of menu items.
+     *
+     * @param item The menu item that was selected.
+     * @return true if the item selection was handled; otherwise, call the superclass method.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Check if the item is the "home" button (back button)

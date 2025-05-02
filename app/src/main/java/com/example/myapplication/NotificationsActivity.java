@@ -13,50 +13,57 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Activity that displays a list of notification messages stored locally in SharedPreferences.
+ */
 public class NotificationsActivity extends AppCompatActivity {
-    private static final String TAG = "NotificationsActivity";
-    private NotificationsAdapter adapter;
-    private final List<String> notificationsList = new ArrayList<>();
-    private RecyclerView recyclerView;
+
+    private static final String TAG = "NotificationsActivity";  // Tag for logging
+    private NotificationsAdapter adapter;                        // Adapter to bind notifications to RecyclerView
+    private final List<String> notificationsList = new ArrayList<>(); // Local list to hold notifications
+    private RecyclerView recyclerView;                           // RecyclerView to display notifications
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        // Initialize toolbar
+        // Set up toolbar and enable back navigation
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);  // Show back button
         }
 
-        // Initialize RecyclerView
+        // Set up RecyclerView with a linear layout
         recyclerView = findViewById(R.id.notificationsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize adapter with empty list
+        // Initialize adapter with an empty list and attach it to the RecyclerView
         adapter = new NotificationsAdapter(new ArrayList<>(), this);
         recyclerView.setAdapter(adapter);
 
-        // Load initial data
+        // Load notifications from SharedPreferences
         loadNotifications();
     }
 
+    /**
+     * Loads notifications from SharedPreferences, splits them, filters out empty entries,
+     * and updates the adapter's data.
+     */
     private void loadNotifications() {
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        String savedNotifications = prefs.getString("update_list", "").trim(); // Trim whitespace
+        String savedNotifications = prefs.getString("update_list", "").trim();  // Get stored notifications
 
-        notificationsList.clear();
+        notificationsList.clear();  // Clear old data
 
         if (!savedNotifications.isEmpty()) {
-            // Split and filter out empty strings
+            // Split notifications by newline and add only non-empty ones
             String[] notificationsArray = savedNotifications.split("\n");
             for (String notification : notificationsArray) {
-                if (!notification.trim().isEmpty()) {  // Only add non-empty strings
+                if (!notification.trim().isEmpty()) {
                     notificationsList.add(notification.trim());
                 }
             }
@@ -68,9 +75,12 @@ public class NotificationsActivity extends AppCompatActivity {
         updateAdapterData();
     }
 
+    /**
+     * Refreshes the RecyclerView adapter with new data.
+     */
     private void updateAdapterData() {
         if (adapter != null) {
-            adapter.updateData(notificationsList);
+            adapter.updateData(notificationsList);  // Update adapter's dataset
         } else {
             Log.e(TAG, "Adapter is null when trying to update data");
         }
@@ -79,19 +89,24 @@ public class NotificationsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadNotifications(); // Refresh data when returning to activity
+        loadNotifications();  // Refresh list when activity comes into view
     }
 
+    /**
+     * Handles toolbar back button click.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            onBackPressed();  // Deprecated but still used for now
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    // Helper method to show toast messages for debugging
+    /**
+     * Displays a toast message (used for debugging).
+     */
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

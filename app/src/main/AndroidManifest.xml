@@ -48,7 +48,8 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|smallestScreenSize|locale|layoutDirection">
         </activity>
         <activity
             android:name=".CourseSearchActivity"

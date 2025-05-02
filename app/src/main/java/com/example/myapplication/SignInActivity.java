@@ -1,11 +1,14 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -83,17 +86,19 @@ public class SignInActivity extends AppCompatActivity {
                                 String email = currentUser.getEmail();
 
                                 if (email != null && email.endsWith("@1utar.my")) {
-                                    Glide.with(SignInActivity.this)
-                                            .load(currentUser.getPhotoUrl())
-                                            .into(imageView);
+                                    if (!isFinishing() && !isDestroyed()) {
+                                        Glide.with(SignInActivity.this)
+                                                .load(currentUser.getPhotoUrl())
+                                                .into(imageView);
 
-                                    name.setText(currentUser.getDisplayName());
-                                    mail.setText(currentUser.getEmail());
+                                        name.setText(currentUser.getDisplayName());
+                                        mail.setText(currentUser.getEmail());
 
-                                    saveUserToDatabase(currentUser);
+                                        saveUserToDatabase(currentUser);
 
-                                    startActivity(new Intent(SignInActivity.this, MainActivity.class));
-                                    finish();
+                                        startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                                        finish();
+                                    }
                                 }
                                 else {
                                     // Invalid email: sign out and show error message
@@ -195,7 +200,5 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
 }

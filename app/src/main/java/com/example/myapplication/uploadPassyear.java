@@ -23,6 +23,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -118,6 +123,10 @@ public class uploadPassyear extends AppCompatActivity {
         getIDForViews();
         setFormEnabled(true);
 
+        // Set up the Toolbar as the ActionBar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);  // Make sure you have a Toolbar with this ID in your layout
+        setSupportActionBar(toolbar);
+
         //For API level 26 above phone permission
         // Create notification channel for local notifications
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -137,6 +146,28 @@ public class uploadPassyear extends AppCompatActivity {
                 pdfuri=null;
                 show_uplname.setText("");
                 Toast.makeText(uploadPassyear.this, "Remove selected file", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        upl_desc.addTextChangedListener(new TextWatcher() {
+            private final int max_length =150;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(s.length() > max_length){
+                        upl_desc.setText(s.subSequence(0,max_length));
+                        upl_desc.setSelection(max_length); // move cursor to end
+                        Toast.makeText(uploadPassyear.this, "Max 150 characters allowed", Toast.LENGTH_LONG).show();
+                    }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -177,6 +208,8 @@ public class uploadPassyear extends AppCompatActivity {
                 uploadPDFAndSaveData();
             }
         });
+
+
 
     }
 
@@ -365,6 +398,17 @@ public class uploadPassyear extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("update_list", updatedUpdates);
         editor.apply();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Check if the item is the "home" button (back button)
+        if (item.getItemId() == android.R.id.home) {
+            // Navigate back to the main menu or previous activity
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

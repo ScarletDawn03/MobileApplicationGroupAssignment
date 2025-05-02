@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +28,8 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView chatRecyclerView;
     private EditText inputComment;
     private Button sendButton;
+    private TextView fileNameText;
+
     private DatabaseReference chatRef;
     private String fileKey;
     private List<CommentModel> commentList;
@@ -38,22 +41,44 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        // Retrieve file key from intent
         fileKey = getIntent().getStringExtra("file_key");
         userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
+        // View bindings
+        fileNameText = findViewById(R.id.file_name_text);
         chatRecyclerView = findViewById(R.id.chat_recycler_view);
         inputComment = findViewById(R.id.input_comment);
         sendButton = findViewById(R.id.send_button);
 
+        // Recycler setup
         commentList = new ArrayList<>();
         chatAdapter = new ChatAdapter(commentList);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         chatRecyclerView.setAdapter(chatAdapter);
 
+        // Chat messages reference
         chatRef = FirebaseDatabase.getInstance()
                 .getReference("courses").child(fileKey).child("chat");
 
-        // Listen to comments
+        // Load and display file name
+        DatabaseReference fileRef = FirebaseDatabase.getInstance()
+                .getReference("courses").child(fileKey);
+
+        fileRef.child("cr_pdfName").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String fileName = snapshot.getValue(String.class);
+                if (fileName != null) {
+                    fileNameText.setText(fileName);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Load comments in real-time
         chatRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -69,6 +94,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {}
         });
 
+        // Send button logic
         sendButton.setOnClickListener(v -> {
             String commentText = inputComment.getText().toString().trim();
             if (!commentText.isEmpty()) {

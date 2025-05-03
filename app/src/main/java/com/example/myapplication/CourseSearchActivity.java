@@ -4,10 +4,12 @@ package com.example.myapplication;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -148,6 +150,12 @@ public class CourseSearchActivity extends AppCompatActivity {
 
         // Initialize search view with hint and input limitation
         searchView = findViewById(R.id.search_view);
+
+        EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+
+        searchEditText.setTextColor(Color.BLACK);          // Text color
+        searchEditText.setHintTextColor(Color.GRAY);       // Hint color
+
         searchView.setQueryHint("Enter Course Code");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

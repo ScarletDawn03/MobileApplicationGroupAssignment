@@ -49,6 +49,9 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
         holder.tvPdfName.setText(item.getCr_pdfName());
         holder.tvCreatedAt.setText(item.getCreated_at());
 
+        // Set likes count
+        holder.tvLikes.setText(item.getLikes() + " Likes");
+
         // Open the PDF in a browser or viewer when "View" button is clicked
         holder.btnViewPdf.setOnClickListener(view -> {
             Context context = view.getContext();
@@ -96,7 +99,7 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
      * ViewHolder class to hold reference to each UI component in the item layout.
      */
     static class UploadViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCourseCode, tvCourseName, tvCategory, tvCreatedAt, tvPdfName;
+        TextView tvCourseCode, tvCourseName, tvCategory, tvCreatedAt, tvPdfName,  tvLikes;
         Button btnViewPdf, btnEditPdf, commentButton, deleteButton;
 
         public UploadViewHolder(@NonNull View itemView) {
@@ -106,6 +109,7 @@ public class MyUploadsAdapter extends RecyclerView.Adapter<MyUploadsAdapter.Uplo
             tvPdfName = itemView.findViewById(R.id.tvPdfName);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvCreatedAt = itemView.findViewById(R.id.tvCreatedAt);
+            tvLikes = itemView.findViewById(R.id.tvLikes);
             btnViewPdf = itemView.findViewById(R.id.btnViewPdf);
             btnEditPdf = itemView.findViewById(R.id.btnEditPdf);
             deleteButton = itemView.findViewById(R.id.deleteButton);

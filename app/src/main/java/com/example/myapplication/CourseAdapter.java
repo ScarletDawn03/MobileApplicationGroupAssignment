@@ -12,8 +12,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import android.content.Context;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +33,8 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     private String userEmail;
     private Context context;
+
+    private TextView likesCount;
 
     /**
      * Constructor for CourseAdapter
@@ -70,6 +76,26 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         } else {
             holder.likeButton.setImageResource(R.drawable.unlike);
         }
+
+
+        DatabaseReference likesRef = databaseReference.child(course.getKey()).child("likes");
+
+        likesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Integer likeCount = snapshot.getValue(Integer.class);
+                if (likeCount != null) {
+                    holder.likesCount.setText("Number of likes: " + likeCount);
+                } else {
+                    holder.likesCount.setText("Number of likes: 0");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                holder.likesCount.setText("Number of likes: 0");
+            }
+        });
 
         // Like button click logic
         holder.likeButton.setOnClickListener(v -> {
@@ -176,12 +202,14 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         private TextView createdBy;
         private ImageView likeButton;
         private ImageButton commentButton;
+        private TextView likesCount;
 
         public CourseViewHolder(View itemView) {
             super(itemView);
             pdfName = itemView.findViewById(R.id.pdf_name);          // PDF name text view
             createdAt = itemView.findViewById(R.id.created_at);      // Created at text view
             createdBy = itemView.findViewById(R.id.created_by);      // Created by text view
+            likesCount = itemView.findViewById(R.id.likes_count);
             likeButton = itemView.findViewById(R.id.like_button);    // Like button
             commentButton = itemView.findViewById(R.id.comment_button); // Comment button
         }
@@ -191,6 +219,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             pdfName.setText(course.getCr_pdfName());
             createdAt.setText(course.getCreated_at());
             createdBy.setText(course.getCreated_by());
+            likesCount = itemView.findViewById(R.id.likes_count);
         }
     }
 }

@@ -395,6 +395,14 @@ public class CourseSearchActivity extends AppCompatActivity {
                     for (DataSnapshot docSnapshot : dataSnapshot.getChildren()) {
                         SourceDocumentModelClass item = docSnapshot.getValue(SourceDocumentModelClass.class);
 
+                        if (item != null) {
+                            Long likesCount = docSnapshot.child("likes").getValue(Long.class);
+                            if (likesCount != null) {
+                                item.setLikes(likesCount.intValue());
+                            }
+                        }
+
+
                         if (item != null && item.getCr_pdfName() != null) {
                             String fileName = item.getCr_pdfName();
 

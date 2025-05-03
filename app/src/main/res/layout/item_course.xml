@@ -41,23 +41,33 @@
                 android:gravity="start|center_vertical"
                 android:paddingTop="8dp">
 
-            <TextView
-                android:id="@+id/created_at"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Created At"
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray"
-                android:paddingTop="4dp" />
+                <TextView
+                    android:id="@+id/likes_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 Likes"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:paddingTop="4dp" /> <!-- Added some padding to match the other views -->
 
-            <TextView
-                android:id="@+id/created_by"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Created By"
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray"
-                android:paddingTop="4dp" />
+                <TextView
+                    android:id="@+id/created_at"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Created At"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:paddingTop="4dp" />
+
+                <TextView
+                    android:id="@+id/created_by"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Created By"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:paddingTop="4dp" />
+
 
 
             </LinearLayout>

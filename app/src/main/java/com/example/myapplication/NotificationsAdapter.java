@@ -51,7 +51,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         } else if (update.endsWith(".docx")) {
             fileTypeIcon.setImageResource(R.drawable.docx);
         } else {
-            fileTypeIcon.setImageResource(R.drawable.pdf); // default icon
+            fileTypeIcon.setImageResource(R.drawable.email); // default icon
         }
 
         // Handle the click event on the "remove" icon

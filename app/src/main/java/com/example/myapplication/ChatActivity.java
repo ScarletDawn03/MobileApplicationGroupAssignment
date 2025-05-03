@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,8 +23,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * ChatActivity handles the chat interface for a specific course file.
@@ -32,7 +35,7 @@ import java.util.Map;
  */
 public class ChatActivity extends AppCompatActivity {
 
-    //Initialization
+    // Initialization
     private RecyclerView chatRecyclerView;
     private EditText inputComment;
     private Button sendButton;
@@ -104,6 +107,50 @@ public class ChatActivity extends AppCompatActivity {
                     commentList.add(comment);
                 }
                 chatAdapter.notifyDataSetChanged();
+
+                // Check if the comment is made by someone else (for notifications)
+                for (DataSnapshot snap : snapshot.getChildren()) {
+                    CommentModel comment = snap.getValue(CommentModel.class);
+                    String commenter = comment.getUser();
+
+                    // If the commenter is not the current user and the current user is the file owner, notify
+                    if (commenter != null && !commenter.equals(userEmail)) {
+                        // Assuming file owner is stored in "created_by" field or something similar
+                        DatabaseReference fileRef = FirebaseDatabase.getInstance()
+                                .getReference("courses").child(fileKey);
+                        fileRef.child("created_by").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                String fileOwner = snapshot.getValue(String.class);
+                                if (fileOwner != null && fileOwner.equals(userEmail)) {
+                                    // Notify the owner that someone commented
+                                    String message = commenter + " commented on your file \"" + fileKey + "\"";
+
+                                    // Store notification in SharedPreferences
+                                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                                    Set<String> processedNotifications = prefs.getStringSet("processed_notifications", new HashSet<>());
+
+                                    if (!processedNotifications.contains(fileKey)) {
+                                        // Append new notification
+                                        String existing = prefs.getString("update_list", "");
+                                        String updated = existing + message + "\n";
+                                        prefs.edit().putString("update_list", updated).apply();
+
+                                        // Mark this fileKey as processed
+                                        processedNotifications.add(fileKey);
+                                        prefs.edit().putStringSet("processed_notifications", processedNotifications).apply();
+
+                                        // Optionally, trigger a local notification or a toast
+                                        showToast("New comment on your file: " + message);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {}
+                        });
+                    }
+                }
             }
 
             @Override
@@ -126,5 +173,10 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    // Method to show a toast message (can be used to show notifications or debugging)
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

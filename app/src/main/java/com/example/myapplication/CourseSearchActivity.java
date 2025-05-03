@@ -127,6 +127,7 @@ public class CourseSearchActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_course_search);
 
+
         // set up our SharedPrefs and pulled‑out flags
         prefs             = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         boolean otherNotified = prefs.getBoolean(KEY_OTHER_NOTIFIED, false);
@@ -169,6 +170,13 @@ public class CourseSearchActivity extends AppCompatActivity {
         categorySpinner = findViewById(R.id.upload_category);
         recyclerView = findViewById(R.id.recycler_view);
         searchButton = findViewById(R.id.search_course_button);
+
+        if (searchButton != null) {
+            searchButton.setEnabled(true);  // Make sure it's initialized
+        } else {
+            Log.e("CourseSearchActivity", "Search button is null!");
+        }
+
 
         // Get current user info
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
@@ -377,53 +385,36 @@ public class CourseSearchActivity extends AppCompatActivity {
      * Fetches documents from Firebase based on course code and category.
      * @param courseCode The course code to search for
      * @param category The document category to filter by
-     */
-    private void fetchDocuments(String courseCode, String category) {
+     */private void fetchDocuments(String courseCode, String category) {
+        courseList.clear();
+        adapter.notifyDataSetChanged();
+        searchButton.setEnabled(false); // Disable search button here
+
         documentsRef.orderByChild("cr_code")
                 .equalTo(courseCode)
                 .get()
                 .addOnSuccessListener(dataSnapshot -> {
-                    // Log search parameters and results
                     Log.d("FirebaseDebug", "Querying for courseCode: " + courseCode + ", Category: " + category);
                     Log.d("FirebaseDebug", "Found: " + dataSnapshot.getChildrenCount() + " items");
 
                     courseList.clear(); // Clear previous results
+                    boolean found = false;
 
-                    boolean found = false; // Track if matching documents are found
+                    // 👇 ADDITION: count matching items needing download URL
+                    List<DataSnapshot> toProcess = new ArrayList<>();
 
-                    // Process each matching document
                     for (DataSnapshot docSnapshot : dataSnapshot.getChildren()) {
                         SourceDocumentModelClass item = docSnapshot.getValue(SourceDocumentModelClass.class);
-
-                        if (item != null) {
-                            Long likesCount = docSnapshot.child("likes").getValue(Long.class);
-                            if (likesCount != null) {
-                                item.setLikes(likesCount.intValue());
-                            }
-                        }
-
-
-                        if (item != null && item.getCr_pdfName() != null) {
-                            String fileName = item.getCr_pdfName();
-
-                            // Check category match
-                            if (item.getCr_category() != null && item.getCr_category().equalsIgnoreCase(category)) {
-                                // Get download URL from Firebase Storage
-                                StorageReference fileRef = storage.getReference().child("pdfs/" + fileName);
-                                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                                    item.setCr_pdfUrl(uri.toString());
-                                    courseList.add(item);
-                                    adapter.notifyDataSetChanged(); // Update UI
-                                }).addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Failed to fetch file URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
-                                found = true; // Mark as found
-                            }
+                        if (item != null && item.getCr_pdfName() != null &&
+                                item.getCr_category() != null &&
+                                item.getCr_category().equalsIgnoreCase(category)) {
+                            toProcess.add(docSnapshot); // Add to processing queue
                         }
                     }
 
-                    // Show "not found" dialog if no matches
-                    if (!found) {
+                    // 👇 ADDITION: handle case when nothing matches
+                    if (toProcess.isEmpty()) {
+                        searchButton.setEnabled(true); // No tasks to wait for
                         new AlertDialog.Builder(this)
                                 .setTitle("Not Found")
                                 .setMessage("No course found for the given code and category.")
@@ -432,12 +423,48 @@ public class CourseSearchActivity extends AppCompatActivity {
                                 })
                                 .setCancelable(false)
                                 .show();
+                        return;
                     }
+
+                    // 👇 ADDITION: process matching items and re-enable at the end
+                    final int[] completed = {0}; // To track async completions
+                    for (DataSnapshot docSnapshot : toProcess) {
+                        SourceDocumentModelClass item = docSnapshot.getValue(SourceDocumentModelClass.class);
+                        if (item != null) {
+                            Long likesCount = docSnapshot.child("likes").getValue(Long.class);
+                            if (likesCount != null) {
+                                item.setLikes(likesCount.intValue());
+                            }
+
+                            String fileName = item.getCr_pdfName();
+                            StorageReference fileRef = storage.getReference().child("pdfs/" + fileName);
+                            fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                item.setCr_pdfUrl(uri.toString());
+                                courseList.add(item);
+                                adapter.notifyDataSetChanged(); // Update UI
+                                completed[0]++;
+                                if (completed[0] == toProcess.size()) {
+                                    searchButton.setEnabled(true); // ✅ Done
+                                }
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to fetch file URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                completed[0]++;
+                                if (completed[0] == toProcess.size()) {
+                                    searchButton.setEnabled(true); // ✅ Done
+                                }
+                            });
+
+                            found = true;
+                        }
+                    }
+
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    searchButton.setEnabled(true); // Re-enable on failure
                 });
     }
+
 
     /**
      * Resets the search page to initial state.

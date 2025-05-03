@@ -105,6 +105,11 @@ public class uploadPassyear extends AppCompatActivity {
                                     pdfuri = null;
                                     return;
                                 }
+                                // Display information
+                                String info = "File Name: " + fileOrgName + "\n";
+                                if(!fileOrgName.isEmpty()){
+                                    show_uplname.setText("Selected File:" + fileOrgName);
+                                }
                             }
                         }
                     }

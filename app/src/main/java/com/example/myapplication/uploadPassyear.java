@@ -182,7 +182,7 @@ public class uploadPassyear extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 code = upl_code.getText().toString().trim().replaceAll("\\s+", "").toUpperCase();
-                name = upl_name.getText().toString().trim();
+                name = upl_name.getText().toString().trim().toUpperCase();
                 category = upl_category.getSelectedItem().toString();
                 desc = upl_desc.getText().toString().trim();
 

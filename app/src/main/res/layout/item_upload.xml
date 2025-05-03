@@ -11,33 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+
+        <TextView
+            android:id="@+id/tvCourseCode"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
-            android:weightSum="3">
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textSize="17sp"
+            android:text="CS101" />
 
-            <TextView
-                android:id="@+id/tvCourseCode"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:textSize="17sp"
-                android:text="CS101" />
+        <TextView
+            android:id="@+id/tvCourseName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textSize="17sp"
+            android:text="Intro to CS" />
 
-            <TextView
-                android:id="@+id/tvCourseName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:textSize="17sp"
-                android:text="Intro to CS" />
-
-
-        </LinearLayout>
 
         <TextView
             android:id="@+id/tvCategory"

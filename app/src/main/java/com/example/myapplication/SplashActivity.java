@@ -1,35 +1,41 @@
 package com.example.myapplication;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Handler;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-/**
- * Activity to display a splash screen when the app starts.
- * This is the introductory screen before navigating to the sign-in page.
- */
+import androidx.appcompat.app.AppCompatActivity;
+
 public class SplashActivity extends AppCompatActivity {
 
-    /**
-     * Called when the activity is first created.
-     * Sets up the splash screen and navigates to the sign-in screen after a delay.
-     */
+    private static final int SPLASH_DURATION = 2500; // in milliseconds (2.5 seconds)
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash); // Set the splash screen layout
+        setContentView(R.layout.activity_splash);
 
-        // Handler to delay the transition to the next activity (SignInActivity)
-        // This will wait 2 seconds before starting the SignInActivity
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Create an Intent to navigate from SplashActivity to SignInActivity
+        // Load animations
+        Animation topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
+        Animation bottomAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_animation);
+
+        // Hook views
+        ImageView logo = findViewById(R.id.splash_logo);
+        TextView appName = findViewById(R.id.splash_text);
+
+        // Set animations
+        logo.setAnimation(topAnim);
+        appName.setAnimation(bottomAnim);
+
+        // Delay before switching to main activity
+        new Handler().postDelayed(() -> {
             Intent intent = new Intent(SplashActivity.this, SignInActivity.class);
-            startActivity(intent); // Start the SignInActivity
-            finish(); // Close the current SplashActivity so it doesn't remain in the back stack
-        }, 2000); // 2000 milliseconds (2 seconds) delay before transitioning
+            startActivity(intent);
+            finish();
+        }, SPLASH_DURATION);
     }
 }

@@ -101,8 +101,7 @@
                 android:layout_height="wrap_content"
                 android:hint="E.g. UCCM2233"
                 android:inputType="text"
-                android:background="@drawable/upload_border"
-                android:textColor="#000000" />
+                android:background="@drawable/upload_border" />
 
             <!-- Course Name -->
             <TextView
@@ -117,8 +116,7 @@
                 android:layout_height="wrap_content"
                 android:hint="E.g. Statistics"
                 android:inputType="text"
-                android:background="@drawable/upload_border"
-                android:textColor="#000000" />
+                android:background="@drawable/upload_border" />
 
             <!-- Category -->
             <TextView

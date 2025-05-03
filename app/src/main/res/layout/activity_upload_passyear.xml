@@ -149,7 +149,7 @@
                     android:id="@+id/upload_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="E.g. Passyear paper from 2022 March"
+                    android:hint="E.g. Pastyear paper from 2022 March"
                     android:background="@drawable/upload_border" />
             </com.google.android.material.textfield.TextInputLayout>
 

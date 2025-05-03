@@ -2,16 +2,25 @@ package com.example.myapplication;
 
 // Android core components
 import android.Manifest;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
     // UI components
     private TextView welcomeText; // Welcome message with user's name
-    private ImageView quoteImageView; // Displays motivational quotes
-    private TextView totalLikesText; // Shows user's total likes count
+    private ImageView quoteImageView, heart1,heart2;
+    private TextView totalLikesText;; // Shows user's total likes count
 
     // Data containers
     private List<String> quoteUrls; // Stores URLs of motivational quotes
@@ -159,12 +168,69 @@ public class MainActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.nav_view);
         drawerLayout = findViewById(R.id.drawer_layout);
 
+        // Initialize UI components
+        welcomeText = findViewById(R.id.welcome_text);
+        totalLikesText = findViewById(R.id.totalLikesText);
+
+        // Measure the text width
+        Paint paint = totalLikesText.getPaint();
+        String text = totalLikesText.getText().toString();
+        float width = paint.measureText(text);
+
+// Create a LinearGradient with rainbow colors
+        Shader shader = new LinearGradient(
+                0, 0, width, 0,
+                new int[]{
+                        Color.RED,
+                        Color.MAGENTA,
+                        Color.BLUE,
+                        Color.parseColor("#008080"),
+                        Color.GREEN,
+                        Color.parseColor("#800080"),
+                        Color.RED // loop back to red
+                },
+                null,
+                Shader.TileMode.CLAMP
+        );
+
+// Apply shader to text
+        totalLikesText.getPaint().setShader(shader);
+        totalLikesText.invalidate();
+
+
+        heart1= findViewById(R.id.heart1);
+        heart2= findViewById(R.id.heart2);
+        Animation blinkAnimation = AnimationUtils.loadAnimation(this, R.anim.blink);
+        heart1.startAnimation(blinkAnimation);
+        heart2.startAnimation(blinkAnimation);
+
+
         // Initialize quote image view with loading animation
         quoteImageView = findViewById(R.id.quoteImageView);
         Glide.with(this)
                 .asGif()
                 .load(R.drawable.loading)
                 .into(quoteImageView);
+
+        // Set initial alpha and scale (optional for visual effect)
+        quoteImageView.setAlpha(0f);
+        quoteImageView.setScaleX(0.5f);
+        quoteImageView.setScaleY(0.5f);
+        quoteImageView.setRotation(0f);
+
+// Create animations
+        ObjectAnimator rotate = ObjectAnimator.ofFloat(quoteImageView, "rotation", 0f, 1080f);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(quoteImageView, "scaleX", 0.5f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(quoteImageView, "scaleY", 0.5f, 1f);
+        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(quoteImageView, "alpha", 0f, 1f);
+
+// Combine animations
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(rotate, scaleX, scaleY, fadeIn);
+        animatorSet.setDuration(2000);
+        animatorSet.setInterpolator(new DecelerateInterpolator());
+        animatorSet.start();
+
 
         // Set up fake search bar functionality
         TextView fakeSearchBar = findViewById(R.id.fakeSearchBar);

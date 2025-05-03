@@ -131,6 +131,12 @@ public class MyUploadsActivity extends AppCompatActivity {
                 .show();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadMyUploads();
+    }
+
     /**
      * Handles the back button in the toolbar.
      */

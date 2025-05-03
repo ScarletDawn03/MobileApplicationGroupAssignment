@@ -49,7 +49,7 @@ public class EditMyUpload extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-
+        //Store information of selected file into variables
         filename = getIntent().getStringExtra("cr_filename");
         c_code = getIntent().getStringExtra("cr_code");
         c_name = getIntent().getStringExtra("cr_name");
@@ -59,8 +59,9 @@ public class EditMyUpload extends AppCompatActivity {
         setIDElement();
         setFormEnabled(true);
 
+        //Limit user to input maximum 150 characters into description of uploaded document
         myupl_desc.addTextChangedListener(new TextWatcher() {
-            private final int max_length = 100;
+            private final int max_length = 150;
           @Override
           public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -81,6 +82,7 @@ public class EditMyUpload extends AppCompatActivity {
           }
         });
 
+        //Perform checking any invalid input when clicking update button
         myupl_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,15 +111,18 @@ public class EditMyUpload extends AppCompatActivity {
                     myupl_desc.setError("Please enter description");
                     return;
                 }
+
+                //Display notification of updating and unable user to perform any action on the form during submission
                 Toast.makeText(EditMyUpload.this, "Updating...Please wait... ", Toast.LENGTH_SHORT).show();
                 setFormEnabled(false);
-                updatePDFAndSaveData();
+                updateData();
             }
         });
 
     }
 
-    private void updatePDFAndSaveData(){
+    //Handle uploading modification of information into database
+    private void updateData(){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
 
@@ -132,6 +137,7 @@ public class EditMyUpload extends AppCompatActivity {
         coursesRef.child(c_key).updateChildren(updatedCourse).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                //Display notification regarding updated successfully and enable user to edit form
                 Toast.makeText(EditMyUpload.this,"Updated Successfully", Toast.LENGTH_SHORT).show();
                 setFormEnabled(true);
             }
@@ -140,11 +146,7 @@ public class EditMyUpload extends AppCompatActivity {
 
     }
 
-    public void goMyUploadList(View view){
-        Intent intent = new Intent(this, MyUploadsActivity.class);
-        startActivity(intent);
-    }
-
+    //Link components
     private void setIDElement(){
         show_myuplname = findViewById(R.id.showmyfilename);
         myupl_code = findViewById(R.id.myupload_code);
@@ -154,6 +156,7 @@ public class EditMyUpload extends AppCompatActivity {
         myupl_desc_layout = findViewById(R.id.myupload_desc_layout);
         myupl_btn = findViewById(R.id.myupload_subbtn);
 
+        //Auto fill the form according the selected document
         show_myuplname.setText(filename);
         myupl_code.setText(c_code);
         myupl_name.setText(c_name);
@@ -168,6 +171,7 @@ public class EditMyUpload extends AppCompatActivity {
 
     }
 
+    //Enable or unable user to edit form
     private void setFormEnabled(boolean enabled) {
         myupl_code.setEnabled(enabled);
         myupl_name.setEnabled(enabled);
@@ -175,13 +179,13 @@ public class EditMyUpload extends AppCompatActivity {
         myupl_desc_layout.setEnabled(enabled);
         myupl_desc.setEnabled(enabled);
         myupl_btn.setEnabled(enabled);
-
     }
     @Override
     public void onBackPressed() {
         super.onBackPressed(); // This handles the default back behavior
     }
 
+    //The button's event handler for back to the previous page
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

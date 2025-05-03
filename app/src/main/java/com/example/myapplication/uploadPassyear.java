@@ -74,6 +74,7 @@ public class uploadPassyear extends AppCompatActivity {
     private static final int REQ_POST_NOTIFICATIONS = 1001;
     private Notification pendingNotification;  // to hold the built notification
 
+    //The luncher for handling selection of document file
     private ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             //Unable use startActivityForResult directly as it deprecated
             new ActivityResultContracts.StartActivityForResult(),
@@ -85,17 +86,19 @@ public class uploadPassyear extends AppCompatActivity {
                         if (pdfuri != null) {
                             Cursor returnCursor = getContentResolver().query(pdfuri, null, null, null, null);
                             if (returnCursor != null && returnCursor.moveToFirst()) {
+                                //Get the information of selected document file
                                 int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                                 int filesize = returnCursor.getColumnIndex(OpenableColumns.SIZE);
                                 long filesizeInByte = returnCursor.getLong(filesize);
+                                //Set max uploaded file size
                                 long maxfileSize = 15 * 1024 * 1024;
 
                                 fileOrgName = returnCursor.getString(nameIndex);
                                 int dotIndex = fileOrgName.lastIndexOf(".");
-
                                 returnCursor.close();
                                 fileExtName = fileOrgName.substring(0,dotIndex); //Dynamically retreive file name
-                                fileType = getContentResolver().getType(pdfuri);
+                                fileType = getContentResolver().getType(pdfuri);  //Get mimeType
+
                                 //Check size of file uploaded
                                 if(filesizeInByte > maxfileSize){
                                     Toast.makeText(uploadPassyear.this, "Only document file below 15MB can be uploaded!", Toast.LENGTH_LONG).show();
@@ -103,14 +106,6 @@ public class uploadPassyear extends AppCompatActivity {
                                     return;
                                 }
                             }
-                            // Display information (you can remove this or modify as needed)
-                            String info = "File Name: " + fileOrgName + "\n";
-                            if(!fileOrgName.isEmpty()){
-                                show_uplname.setText("Selected File:" + fileOrgName);
-                            }
-
-                            Toast.makeText(uploadPassyear.this, info, Toast.LENGTH_LONG).show();
-
                         }
                     }
                 }
@@ -144,6 +139,7 @@ public class uploadPassyear extends AppCompatActivity {
             nm.createNotificationChannel(chan);
         }
 
+        //Remove selected file when click 'Reset' button
         rst_uplbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,6 +149,7 @@ public class uploadPassyear extends AppCompatActivity {
             }
         });
 
+        //Limit user to input maximum 150 characters into description of uploaded document
         upl_desc.addTextChangedListener(new TextWatcher() {
             private final int max_length =150;
             @Override
@@ -175,6 +172,7 @@ public class uploadPassyear extends AppCompatActivity {
             }
         });
 
+        //Checking and submit input to database when clicking submit button
         upl_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -207,9 +205,11 @@ public class uploadPassyear extends AppCompatActivity {
                     upl_desc.setError("Please enter description");
                     return;
                 }
+
+                //Display notification of updating and unable user to perform any action on the form during submission
                 Toast.makeText(uploadPassyear.this,"Uploading...Please wait... ", Toast.LENGTH_SHORT).show();
                 setFormEnabled(false);
-                uploadPDFAndSaveData();
+                uploadFileAndSaveData();
             }
         });
 
@@ -247,11 +247,7 @@ public class uploadPassyear extends AppCompatActivity {
         }
     }
 
-    public void goHome(View view){
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
-
+    //Upload input data into database
     private void addCourseToDB(String code, String name, String category, String desc,String filename,String pdfUrl,String author){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
@@ -271,10 +267,11 @@ public class uploadPassyear extends AppCompatActivity {
         courseHashmap.put("liked_by", new HashMap<String, Boolean>());
 
 
-        //something like primary key
+        //Something like primary key
         String key = coursesRef.push().getKey();
         courseHashmap.put("key",key);
 
+        //Reset form after submitting successfully
         coursesRef.child(key).setValue(courseHashmap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -286,11 +283,11 @@ public class uploadPassyear extends AppCompatActivity {
                 upl_category.setSelection(0);
                 pdfuri = null;
                 setFormEnabled(true);
-
             }
         });
     }
 
+    //Link components
     public void getIDForViews(){
         upl_code = findViewById(R.id.upload_code);
         upl_name = findViewById(R.id.upload_name);
@@ -303,6 +300,7 @@ public class uploadPassyear extends AppCompatActivity {
         rst_uplbtn = findViewById(R.id.rst_uplbtn);
     }
 
+    //Enable or unable user to edit form
     private void setFormEnabled(boolean enabled) {
         upl_code.setEnabled(enabled);
         upl_name.setEnabled(enabled);
@@ -310,8 +308,10 @@ public class uploadPassyear extends AppCompatActivity {
         upl_desc_layout.setEnabled(enabled);
         upl_btn.setEnabled(enabled);
         selectFile_btn.setEnabled(enabled);
+        rst_uplbtn.setEnabled(enabled);
     }
 
+    //Open storage and limit the file type in selecting document file
     public void openFile(View view){
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -321,36 +321,41 @@ public class uploadPassyear extends AppCompatActivity {
         filePickerLauncher.launch(intent);
     }
 
-
-    private void uploadPDFAndSaveData() {
+    //
+    private void uploadFileAndSaveData() {
         if (pdfuri != null) {
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
-            String timeStamp = sdf.format(new Date());
-            if("application/msword".equals(fileType)){
+            String timeStamp = sdf.format(new Date()); //Get date and time for 'created_at' attribute
+            if("application/msword".equals(fileType)){ //Set the file name to be stored in database
                 fileName =  fileExtName+"_"+timeStamp+ ".doc";
             }else if("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(fileType)){
                 fileName =  fileExtName+"_"+timeStamp+ ".docx";
             }else if("application/pdf".equals(fileType)){
                 fileName =  fileExtName+"_"+timeStamp+ ".pdf";
             }
+
+            //The location of storing uploaded document
             StorageReference fileRef = storageRef.child("pdfs/" + fileName);
 
+            //Retrieve user's email as author of uploaded document
             SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
             String userEmail = sharedPreferences.getString("user_email", null);
 
+            //Upload file to Firebase storage
             fileRef.putFile(pdfuri).addOnSuccessListener(taskSnapshot -> {
+                        //Get URL of uploaded file
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                             String pdfUrl = uri.toString();
+                            //Upload file's information into database
                             addCourseToDB(code,name,category,desc,fileName,pdfUrl,userEmail);
+                            //Reset variable for storing file name
                             fileExtName = null;
                         });
 
                         // Save successful update to SharedPreferences
                         String newUpdate = code + "," + category + " - " + "Upload successful for " + fileName ;
                         saveUpdateToPreferences(newUpdate);
-
-                        Toast.makeText(uploadPassyear.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();
 
                         // Get the user’s saved prefs
                         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -404,6 +409,7 @@ public class uploadPassyear extends AppCompatActivity {
         editor.apply();
     }
 
+    //The button's event handler for back to the previous page
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

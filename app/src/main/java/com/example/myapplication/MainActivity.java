@@ -2,9 +2,14 @@ package com.example.myapplication;
 
 // Android core components
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,9 +19,13 @@ import android.widget.Toast;
 // AndroidX components
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -74,6 +83,19 @@ public class MainActivity extends AppCompatActivity {
     // Data containers
     private List<String> quoteUrls; // Stores URLs of motivational quotes
 
+    private SharedPreferences prefs;
+    private long lastMotivationShown = 0;
+
+
+    // Separate cooldown constants
+    private static final long DIALOG_COOLDOWN = 86400000;  // 24 hours of cooldown time
+    private static final long NOTIFICATION_COOLDOWN = 900000; // 15 minutes of cooldown time
+    private static final String PREF_FIRST_LAUNCH = "first_launch"; // to store value when the user open the app
+
+    private long lastDialogTime = 0; // default value for dialog message
+    private long lastNotificationTime = 0; //default value for pop-up notification
+
+
     /**
      * Initializes the activity, sets up UI components and verifies user session.
      * @param savedInstanceState Saved state bundle for activity recreation
@@ -98,6 +120,29 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         quotesRef = FirebaseDatabase.getInstance().getReference("quotes");
         coursesRef = FirebaseDatabase.getInstance().getReference("courses");
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //Notifications permissions check for API level 33+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    1002 // Unique request code
+            );
+        }
+
+        //Pop-up notification initialization
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "motivation_channel",
+                    "Progress Updates",
+                    NotificationManager.IMPORTANCE_HIGH // Use HIGH for pop-up notifications
+            );
+            channel.setDescription("Achievement progress notifications");
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
+
 
         // Verify user authentication
         if (mAuth.getCurrentUser() == null) {
@@ -162,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         // Verify and load user profile
         checkUserProfileCompletion();
         populateUserHeader();
+        checkForMotivations();
     }
 
     /**
@@ -221,6 +267,100 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Error: " + databaseError.getMessage());
             }
         });
+    }
+
+    //function to check for toggle button from notification preferences java code
+    private void checkForMotivations() {
+        boolean allowDialogs = prefs.getBoolean("pref_show_dialogs", true);
+        boolean allowNotifications = prefs.getBoolean("pref_show_notifications", true);
+
+        long now = System.currentTimeMillis();
+
+        // Always show on app launch (first check)
+        boolean showDialog = allowDialogs &&
+                (now - lastDialogTime) > DIALOG_COOLDOWN;
+
+        boolean showNotification = allowNotifications &&
+                (now - lastNotificationTime) > NOTIFICATION_COOLDOWN;
+
+        if (showDialog || showNotification) {
+            checkUploadCount(showDialog, showNotification);
+        }
+    }
+
+    //function to check total upload count
+    private void checkUploadCount(boolean showDialog, boolean showNotification) {
+        coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int uploadCount = 0;
+                for (DataSnapshot courseSnap : snapshot.getChildren()) {
+                    UploadItem item = courseSnap.getValue(UploadItem.class);
+                    if (item != null && item.getCreated_by().equals(mAuth.getCurrentUser().getEmail())) {
+                        uploadCount++;
+                    }
+                }
+
+                if (showDialog) showMotivationDialog(uploadCount);
+                if (showNotification) showMotivationalNotification(uploadCount);
+            }
+
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    //function to show motivational dialog
+    private void showMotivationDialog(int uploadCount) {
+        String message = generateMessage(uploadCount);
+        if (message != null) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Achievement Upload Progress")
+                    .setMessage(message)
+                    .setPositiveButton("OK", (d, w) -> {
+                        // Update DIALOG cooldown only
+                        lastDialogTime = System.currentTimeMillis();
+                    })
+                    .show();
+        }
+    }
+
+    //function to pop-up motivational notifications
+    private void showMotivationalNotification(int uploadCount) {
+        String message = generateMessage(uploadCount);
+        if (message == null) return;
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "motivation_channel")
+                .setSmallIcon(R.drawable.achievement_icon)
+                .setContentTitle("Latest Update Progress")
+                .setContentText(message)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            manager.notify((int) System.currentTimeMillis(), builder.build());
+
+            // Update NOTIFICATION cooldown
+            lastNotificationTime = System.currentTimeMillis();
+        }
+    }
+
+    //function to generate the motivation message
+    private String generateMessage(int uploadCount) {
+        // Test with fixed value
+        // uploadCount = 5; // Uncomment for testing
+
+        if (uploadCount < AchievementConstant.SILVER_MIN) {
+            int remaining = AchievementConstant.SILVER_MIN - uploadCount;
+            return remaining + " more uploads to Silver!";
+        } else if (uploadCount < AchievementConstant.GOLD_MIN) {
+            int remaining = AchievementConstant.GOLD_MIN - uploadCount;
+            return remaining + " more uploads to Gold!";
+        } else if (uploadCount < AchievementConstant.MAX_UPLOADS) {
+            int remaining = AchievementConstant.MAX_UPLOADS - uploadCount;
+            return remaining + " more uploads to Max Tier!";
+        }
+        return "Keep uploading to unlock achievements!"; // Default message
     }
 
     /**

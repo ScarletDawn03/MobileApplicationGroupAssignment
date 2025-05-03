@@ -29,10 +29,10 @@ public class AchievementActivity extends AppCompatActivity {
     private Button btnBack;
     private TextView tvLatestUploadDate;
 
-    // Medal thresholds
-    private static final int BRONZE_MAX = 33;
-    private static final int SILVER_MAX = 66;
-    private static final int GOLD_MAX   = 100;
+    // Each Medal benchmark
+    private static final int BRONZE_MAX = AchievementConstant.SILVER_MIN - 1;
+    private static final int SILVER_MAX = AchievementConstant.GOLD_MIN - 1;
+    private static final int GOLD_MAX   = AchievementConstant.MAX_UPLOADS - 1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,7 +48,7 @@ public class AchievementActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
-        //Try to retreive current user information
+        //To retrieve current user information
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Toast.makeText(this, "Please sign in", Toast.LENGTH_SHORT).show();
@@ -61,7 +61,7 @@ public class AchievementActivity extends AppCompatActivity {
         String userEmail = user.getEmail();  // Get current user's email
         DatabaseReference coursesRef = FirebaseDatabase.getInstance().getReference("courses");
 
-
+        /** A function to check the current user total upload amount and latest uploaded date**/
         coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -85,6 +85,7 @@ public class AchievementActivity extends AppCompatActivity {
             }
 
 
+            //Display error message to user if it is failed
             @Override
             public void onCancelled(DatabaseError error) {
                 Toast.makeText(AchievementActivity.this, "Failed to load uploads", Toast.LENGTH_SHORT).show();
@@ -93,6 +94,7 @@ public class AchievementActivity extends AppCompatActivity {
 
     }
 
+    //Convert the date into readable format
     private String formatDate(String isoDateString) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
@@ -104,6 +106,7 @@ public class AchievementActivity extends AppCompatActivity {
         }
     }
 
+    //Function of dynamic update User Interface based on amount uploaded
     private void updateUI(int count, String latestDate) {
         tvCount.setText("Total Uploads: " + count);
         progressBar.setMax(GOLD_MAX);
@@ -111,10 +114,10 @@ public class AchievementActivity extends AppCompatActivity {
 
         if (count <= BRONZE_MAX) {
             imgMedal.setImageResource(R.drawable.medal_bronze);
-            tvNextTier.setText("Next: Silver at " + (BRONZE_MAX+1) + " uploads");
+            tvNextTier.setText("Next: Silver at " + AchievementConstant.SILVER_MIN + " uploads");
         } else if (count <= SILVER_MAX) {
             imgMedal.setImageResource(R.drawable.medal_silver);
-            tvNextTier.setText("Next: Gold at " + (SILVER_MAX+1) + " uploads");
+            tvNextTier.setText("Next: Gold at " + AchievementConstant.GOLD_MIN + " uploads");
         } else {
             imgMedal.setImageResource(R.drawable.medal_gold);
             tvNextTier.setText("Max tier achieved!");
@@ -124,6 +127,11 @@ public class AchievementActivity extends AppCompatActivity {
             tvLatestUploadDate.setText("Latest Upload: " + formatDate(latestDate));
         } else {
             tvLatestUploadDate.setText("Latest Upload: " + formatDate(latestDate));
+
         }
+        // Function of add progress percentage
+        double progressPercent = (double) count / GOLD_MAX * 100;
+        String progressText = String.format(Locale.getDefault(),
+                "Progress: %.1f%% to Gold", progressPercent);
     }
 }

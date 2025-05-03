@@ -34,10 +34,17 @@
         android:textColor="?android:attr/textColorPrimary"/>
 
     <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switchMessages"
+        android:id="@+id/switchDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Messages"
+        android:text="Progress Dialogs"
+        android:textColor="?android:attr/textColorPrimary"/>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Progress Notifications"
         android:textColor="?android:attr/textColorPrimary"/>
 
     <Button

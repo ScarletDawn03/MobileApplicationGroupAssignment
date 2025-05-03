@@ -76,9 +76,7 @@
         <activity
             android:name=".NotificationPreferences"
             android:theme="@style/Theme.MyApplication" />
-        <activity
-            android:name=".PrivacySettings"
-            android:theme="@style/Theme.MyApplication" />
+
         <activity
             android:name=".AchievementActivity"
             android:theme="@style/Theme.MyApplication" />

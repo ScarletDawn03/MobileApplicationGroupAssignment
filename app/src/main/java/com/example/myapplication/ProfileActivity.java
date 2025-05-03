@@ -25,6 +25,11 @@ import com.google.firebase.storage.StorageReference;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.text.InputFilter;
+import android.text.Spanned;
+import java.lang.ref.WeakReference;
+import android.content.Context;
+
 public class ProfileActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
@@ -51,6 +56,11 @@ public class ProfileActivity extends AppCompatActivity {
         editFullName = findViewById(R.id.editFullName);
         editUsername = findViewById(R.id.editUsername);
         editContact = findViewById(R.id.editContact);
+
+        //set length limit for each edit textfield
+        setMaxLengthWithToast(editFullName, 30);
+        setMaxLengthWithToast(editUsername, 15);
+        setMaxLengthWithToast(editContact, 15);
 
         txtGender = findViewById(R.id.txtGender);
         txtDOB = findViewById(R.id.txtDOB);
@@ -110,6 +120,8 @@ public class ProfileActivity extends AppCompatActivity {
             String newUsername = editUsername.getText().toString().trim();
             String newContact = editContact.getText().toString().trim();
 
+            /**function of retrieve the data from firebase and display to the relevant user**/
+            /** and also function to check the update changes and error handling for duplicated information**/
             dbRef.get().addOnSuccessListener(snapshot -> {
                 if (snapshot.exists()) {
                     String currentFullName = snapshot.child("fullName").getValue(String.class);
@@ -119,7 +131,7 @@ public class ProfileActivity extends AppCompatActivity {
                     boolean isFullNameChanged = !newFullName.equals(currentFullName);
                     boolean isUsernameChanged = !newUsername.equals(currentUsername);
                     boolean isContactChanged = !newContact.equals(currentContact);
-
+                    //If there is no changes, nothing update to the Firebase
                     if (!isFullNameChanged && !isUsernameChanged && !isContactChanged && imageUri == null) {
                         Toast.makeText(this, "No changes to update.", Toast.LENGTH_SHORT).show();
                         return;
@@ -135,6 +147,7 @@ public class ProfileActivity extends AppCompatActivity {
                             String otherUsername = userSnapshot.child("username").getValue(String.class);
                             String otherContact = userSnapshot.child("contactNumber").getValue(String.class);
 
+                            //to check for the edit text field matches with the database
                             if (isFullNameChanged && newFullName.equals(otherFullName)) {
                                 errorMessage.append("Full name already exists.\n");
                             }
@@ -146,14 +159,17 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                         }
 
+                        //Show error message if it is failed to update
                         if (errorMessage.length() > 0) {
                             Toast.makeText(this, errorMessage.toString().trim(), Toast.LENGTH_LONG).show();
                         } else {
+                            // the user able update their latest information
                             Map<String, Object> updates = new HashMap<>();
                             if (isFullNameChanged) updates.put("fullName", newFullName);
                             if (isUsernameChanged) updates.put("username", newUsername);
                             if (isContactChanged) updates.put("contactNumber", newContact);
 
+                            //Show message if update successfully
                             dbRef.updateChildren(updates).addOnSuccessListener(aVoid -> {
                                 Toast.makeText(this, "Profile updated!", Toast.LENGTH_SHORT).show();
                                 editFullName.setEnabled(false);
@@ -172,6 +188,13 @@ public class ProfileActivity extends AppCompatActivity {
             }).addOnFailureListener(e ->
                     Toast.makeText(this, "Failed to load profile for update: " + e.getMessage(), Toast.LENGTH_SHORT).show()
             );
+        });
+    }
+
+    // Function Helper to show toast message if beyond maximum character limits
+    private void setMaxLengthWithToast(EditText editText, int maxLength) {
+        editText.setFilters(new InputFilter[]{
+                new InputFilterWithToast(this, maxLength)
         });
     }
 
@@ -204,5 +227,33 @@ public class ProfileActivity extends AppCompatActivity {
         ).addOnFailureListener(e ->
                 Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
+    }
+
+    //Function to display toast message
+    private static class InputFilterWithToast implements InputFilter {
+        private final int maxLength;
+        private final WeakReference<Context> contextRef;
+
+        public InputFilterWithToast(Context context, int maxLength) {
+            this.contextRef = new WeakReference<>(context);
+            this.maxLength = maxLength;
+        }
+
+        //A function to filter out the beyond character limit
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end,
+                                   Spanned dest, int dstart, int dend) {
+            int newLength = dest.length() - (dend - dstart) + (end - start);
+            if (newLength > maxLength) {
+                Context context = contextRef.get();
+                if (context != null) {
+                    Toast.makeText(context,
+                            "Maximum " + maxLength + " characters allowed",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return ""; // Block the input
+            }
+            return null; // Accept the input
+        }
     }
 }

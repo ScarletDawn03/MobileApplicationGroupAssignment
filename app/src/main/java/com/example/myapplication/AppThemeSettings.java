@@ -17,6 +17,8 @@ public class AppThemeSettings extends AppCompatActivity {
     private Button btnSave;
     private SharedPreferences prefs;
 
+    /** this function is to set background theme whether is light mode or dark mode**/
+    /** By default it is light mode for user **/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 

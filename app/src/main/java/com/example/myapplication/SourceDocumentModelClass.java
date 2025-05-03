@@ -24,6 +24,11 @@ public class SourceDocumentModelClass {
     private int likes;              // Total number of likes received
     private Map<String, Boolean> liked_by; // Map of user IDs/emails who liked the document
 
+    private boolean isLiked;
+
+    public boolean isLiked() { return isLiked; }
+    public void setLiked(boolean liked) { isLiked = liked; }
+
     /**
      * Default constructor required for Firebase deserialization.
      */

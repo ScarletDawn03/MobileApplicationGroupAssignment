@@ -90,10 +90,10 @@ public class MainProfile extends AppCompatActivity {
         ((TextView)rowNotif.findViewById(R.id.tvMenuLabel))
                 .setText("Notification Preferences");
 
-        // Privacy Settings
+        // FAQ
         View rowPrivacy = findViewById(R.id.menu_privacy);
         ((TextView)rowPrivacy.findViewById(R.id.tvMenuLabel))
-                .setText("Privacy Settings");
+                .setText("FAQ");
 
         // My Achievements
         View rowAch = findViewById(R.id.menu_achievements);
@@ -149,12 +149,9 @@ public class MainProfile extends AppCompatActivity {
                 });
 
 
-           /* btnGoToProfile = findViewById(R.id.menu_profile_information);
-            btnThemeSettings = findViewById(R.id.menu_theme);
-            btnNotificationPref = findViewById(R.id.menu_notifications);
-            btnPrivacySettings = findViewById(R.id.menu_privacy);
-            btnAchievements = findViewById(R.id.menu_achievements);*/
 
+
+        /** The function of direct to the related interface**/
         rowProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MainProfile.this, ProfileActivity.class);
             startActivity(intent);
@@ -171,7 +168,7 @@ public class MainProfile extends AppCompatActivity {
         });
 
         rowPrivacy.setOnClickListener(v -> {
-            Intent intent = new Intent(MainProfile.this, PrivacySettings.class);
+            Intent intent = new Intent(MainProfile.this, AboutUsActivity.class);
             startActivity(intent);
         });
 
@@ -180,17 +177,6 @@ public class MainProfile extends AppCompatActivity {
             startActivity(intent);
         });
 
-       /* //Testing for notification features work or not
-        Button testBtn = findViewById(R.id.btnTestNotification);
-        testBtn.setOnClickListener(v -> {
-            MyFirebaseMessagingService.simulateNotification(
-                    this,
-                    //new MyFirebaseMessagingService(), // simulated context
-                    "like_comment",
-                    "You got a new like!",
-                    "Alice liked your past year paper."
-            );
-        });*/
 
 
     }

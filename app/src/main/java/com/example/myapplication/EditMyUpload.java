@@ -37,6 +37,7 @@ public class EditMyUpload extends AppCompatActivity {
     private Button myupl_btn;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference coursesRef = database.getReference("courses");
+    private Toast toast;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +114,8 @@ public class EditMyUpload extends AppCompatActivity {
                 }
 
                 //Display notification of updating and unable user to perform any action on the form during submission
-                Toast.makeText(EditMyUpload.this, "Updating...Please wait... ", Toast.LENGTH_SHORT).show();
+                toast = Toast.makeText(EditMyUpload.this, "Updating...Please wait... ", Toast.LENGTH_SHORT);
+                toast.show();
                 setFormEnabled(false);
                 updateData();
             }
@@ -138,6 +140,7 @@ public class EditMyUpload extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 //Display notification regarding updated successfully and enable user to edit form
+                toast.cancel();
                 Toast.makeText(EditMyUpload.this,"Updated Successfully", Toast.LENGTH_SHORT).show();
                 setFormEnabled(true);
             }

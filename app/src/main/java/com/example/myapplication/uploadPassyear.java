@@ -73,7 +73,7 @@ public class uploadPassyear extends AppCompatActivity {
     //For notification permission check and function
     private static final int REQ_POST_NOTIFICATIONS = 1001;
     private Notification pendingNotification;  // to hold the built notification
-
+    private Toast toast;
     //The luncher for handling selection of document file
     private ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             //Unable use startActivityForResult directly as it deprecated
@@ -182,7 +182,7 @@ public class uploadPassyear extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 code = upl_code.getText().toString().trim().replaceAll("\\s+", "").toUpperCase();
-                name = upl_name.getText().toString().trim();
+                name = upl_name.getText().toString().trim().toUpperCase();
                 category = upl_category.getSelectedItem().toString();
                 desc = upl_desc.getText().toString().trim();
 
@@ -212,7 +212,8 @@ public class uploadPassyear extends AppCompatActivity {
                 }
 
                 //Display notification of updating and unable user to perform any action on the form during submission
-                Toast.makeText(uploadPassyear.this,"Uploading...Please wait... ", Toast.LENGTH_SHORT).show();
+                toast = Toast.makeText(uploadPassyear.this, "Uploading...Please wait... ", Toast.LENGTH_SHORT);
+                toast.show();
                 setFormEnabled(false);
                 uploadFileAndSaveData();
             }
@@ -280,6 +281,7 @@ public class uploadPassyear extends AppCompatActivity {
         coursesRef.child(key).setValue(courseHashmap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                toast.cancel();
                 Toast.makeText(uploadPassyear.this,"Uploaded Successfully", Toast.LENGTH_SHORT).show();
                 upl_code.setText("");
                 upl_name.setText("");

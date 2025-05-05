@@ -77,8 +77,7 @@
                 android:layout_height="wrap_content"
                 android:hint="E.g. UCCM2233"
                 android:inputType="text"
-                android:background="@drawable/upload_border"
-                android:textColor="#000000" />
+                android:background="@drawable/upload_border" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -93,8 +92,7 @@
                 android:layout_height="wrap_content"
                 android:hint="E.g. Statistics"
                 android:inputType="text"
-                android:background="@drawable/upload_border"
-                android:textColor="#000000" />
+                android:background="@drawable/upload_border" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -127,7 +125,7 @@
                     android:id="@+id/myupload_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="E.g. Passyear paper from 2022 March"
+                    android:hint="E.g. Pastyear paper from 2022 March"
                     android:background="@drawable/upload_border"
                     android:maxLines="3"
                     app:counterEnabled="true"
